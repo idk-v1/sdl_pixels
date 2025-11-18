@@ -40,7 +40,11 @@ int main()
 				break;
 			}
 		}
-		SDL_GetMouseState(&mouseX, &mouseY);
+		SDL_GetGlobalMouseState(&mouseX, &mouseY);
+		int winX = 0, winY = 0;
+		SDL_GetWindowPosition(window, &winX, &winY);
+		mouseX -= winX;
+		mouseY -= winY;
 
 		Uint64 now = SDL_GetTicks();
 		Uint32 fpsScale = 1;
@@ -55,12 +59,51 @@ int main()
 
 		clearScreen(surface, rgb(0x00, 0x00, 0x3F));
 
-		drawCircle(surface, mouseX, mouseY, 100, rgb(255, 255, 255));
+		drawCircle(surface, mouseX, mouseY, 100, rgb(0xFF, 0xFF, 0xFF));
 
-		drawText(surface, 10, 100, 0, rgb(255, 255, 255), "'<': signed/\nunsigned mismatch");
-		drawText(surface, 10, 125, 1, rgb(255, 255, 255), "'<': signed/\nunsigned mismatch");
-		drawText(surface, 10, 175, 2, rgb(255, 255, 255), "'<': signed/\nunsigned mismatch");
-		drawText(surface, 10, 250, 3, rgb(255, 255, 255), "'<': signed/\nunsigned mismatch");
+		const char* text = "'<': signed/\nunsigned mismatch";
+		Uint32 textW, textH;
+
+		getTextSize(text, 0, &textW, &textH);
+		drawRect(surface, 10, 100, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawText(surface, 10, 100, 0, rgb(0xFF, 0xFF, 0xFF), text);
+
+		getTextSize(text, 1, &textW, &textH);
+		drawRect(surface, 10, 125, textW, textH, rgb(0, 0, 0));
+		drawText(surface, 10, 125, 1, rgb(0xFF, 0xFF, 0xFF), text);
+
+		getTextSize(text, 2, &textW, &textH);
+		drawRect(surface, 10, 175, textW, textH, rgb(0, 0, 0));
+		drawText(surface, 10, 175, 2, rgb(0xFF, 0xFF, 0xFF), text);
+
+		Uint32 colors[10];
+		colors[0] = rgb(0xFF, 0x00, 0x00);
+		colors[1] = rgb(0xFF, 0x7F, 0x00);
+		colors[2] = rgb(0xFF, 0xFF, 0x00);
+		colors[3] = rgb(0x00, 0xFF, 0x00);
+		colors[4] = rgb(0x00, 0xFF, 0xFF);
+		colors[5] = rgb(0x00, 0x7F, 0xFF);
+		colors[6] = rgb(0x00, 0x00, 0xFF);
+		colors[7] = rgb(0x7F, 0x00, 0xFF);
+		colors[8] = rgb(0xFF, 0x00, 0xFF);
+		colors[9] = rgb(0xFF, 0x00, 0x7F);
+
+		// basically drawText, but rainbow
+		Sint32 textX = 0;
+		Sint32 textY = 0;
+		for (Sint32 i = ' ' + 1; i < 127; i++)
+		{
+			drawChar(surface, 10 + textX, 250 + textY, 2, colors[i % 10], i);
+			if ((i - ' ') % 24 == 0 && (i - ' '))
+			{
+				textY += font_h * 2;
+				textX = 0;
+			}
+			else
+			{
+				textX += font_w * 2;
+			}
+		}
 		
 		SDL_UpdateWindowSurface(window);
 		fps++;

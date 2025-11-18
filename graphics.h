@@ -2,26 +2,28 @@
 
 #include <SDL3/SDL.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <stdarg.h>
 
 static const SDL_PixelFormatDetails* pixFmt = NULL;
 
-inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
+inline static Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
 {
 	return SDL_MapRGB(pixFmt, NULL, r, g, b);
 }
 
-inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
+inline static void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	((Uint32*)surface->pixels)[x + y * surface->w] = color;
 }
 
-inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	*((Uint64*)&((Uint32*)surface->pixels)[x + y * surface->w]) = color;
 }
 
-inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
+inline static void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	if (x < (Uint32)surface->w && y < (Uint32)surface->h)
 		setPixelUC(surface, x, y, color);
@@ -30,7 +32,7 @@ inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 }
 
 #ifdef USE_AVX
-inline void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 {
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
@@ -51,7 +53,7 @@ inline void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 	//memcpy(&((Uint32*)surface->pixels)[x + 56 + y * surface->w], color, sizeof(*color));
 }
 
-inline void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 {
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
@@ -64,7 +66,7 @@ inline void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 	//memcpy(&((Uint32*)surface->pixels)[x + 24 + y * surface->w], color, sizeof(*color));
 }
 
-inline void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 {
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
@@ -73,16 +75,16 @@ inline void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 	//memcpy(&((Uint32*)surface->pixels)[x + 8 + y * surface->w], color, sizeof(*color));
 }
 
-inline void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
 {
 	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
 
 	//memcpy(&((Uint32*)surface->pixels)[x + y * surface->w], color, sizeof(*color));
 }
 #else
-inline void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	color = 0xFFFF0000FFFF0000;
+	//color = 0xFFFF0000FFFF0000;
 
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -117,12 +119,12 @@ inline void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 	setPixel2UC(surface, x + 60, y, color);
 	setPixel2UC(surface, x + 62, y, color);
 
-	setPixelUC(surface, x, y, 0xFFFF00FF);
+	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
-inline void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	color = 0xFFFF7F00FFFF7F00;
+	//color = 0xFFFF7F00FFFF7F00;
 
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -141,12 +143,12 @@ inline void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 	setPixel2UC(surface, x + 28, y, color);
 	setPixel2UC(surface, x + 30, y, color);
 
-	setPixelUC(surface, x, y, 0xFFFF00FF);
+	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
-inline void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	color = 0xFFFFFF00FFFFFF00;
+	//color = 0xFFFFFF00FFFFFF00;
 
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -157,23 +159,23 @@ inline void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 	setPixel2UC(surface, x + 12, y, color);
 	setPixel2UC(surface, x + 14, y, color);
 
-	setPixelUC(surface, x, y, 0xFFFF00FF);
+	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
-inline void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	color = 0xFF00FF00FF00FF00;
+	//color = 0xFF00FF00FF00FF00;
 
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
 	setPixel2UC(surface, x + 4, y, color);
 	setPixel2UC(surface, x + 6, y, color);
 
-	setPixelUC(surface, x, y, 0xFFFF00FF);
+	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 #endif
 
-void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
+static void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
 	__m256i color256 = _mm256_set_epi64x(color64, color64, color64, color64);
@@ -241,7 +243,7 @@ void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint3
 	}
 }
 
-void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 color)
+static void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 color)
 {
 	const Sint32 border = 0;
 	if (w < 0)
@@ -274,7 +276,7 @@ void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint
 	setRect(surface, x, y, w, h, color);
 }
 
-void clearScreen(SDL_Surface* surface, Uint32 color)
+static void clearScreen(SDL_Surface* surface, Uint32 color)
 {
 	Sint32 w = surface->w;
 	Sint32 h = surface->h;
@@ -341,7 +343,7 @@ void clearScreen(SDL_Surface* surface, Uint32 color)
 	}
 }
 
-void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color)
+static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color)
 {
 	if (r < 0)
 		r = -r;
@@ -468,7 +470,9 @@ void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color
 }
 
 
-void getTextSize(const char* text, Uint32* width, Uint32* height)
+#include "bulletinV1_font.h"
+
+static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* height)
 {
 	*width = 0;
 	*height = 0;
@@ -479,7 +483,7 @@ void getTextSize(const char* text, Uint32* width, Uint32* height)
 	*height = 1;
 
 	Uint32 x = 0;
-	Uint32 y = 0;
+	Uint32 y = 1;
 
 	for (Uint32 i = 0; text[i]; i++)
 	{
@@ -487,98 +491,114 @@ void getTextSize(const char* text, Uint32* width, Uint32* height)
 		{
 			if (x > *width)
 				*width = x;
-			y++;
+			y += 1;
 			x = 0;
 		}
 		else
 		{
-			x++;
-			(*height)++;
+			x += 1;
+			*height = y;
 		}
 	}
 	if (x > *width)
 		*width = x;
-}
 
-
-#include "bulletinV1_font.h"
-
-bool getArrayBit(Uint32 array[], Uint32 i)
-{
-	Uint32 index = i / 32;
-	Uint32 shift = 31 - i % 32;
-	return (array[index] >> shift) & 1;
-}
-
-void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color, const char* text)
-{
-	Uint32 width = 0;
-	Uint32 height = 0;
-	getTextSize(text, &width, &height);
-
-	Sint32 xx = 0;
-	Sint32 yy = 0;
-	if (size == 0)
+	if (size)
 	{
-		for (Sint32 i = 0; text[i]; i++)
-		{
-
-			if (text[i] == '\n')
-			{
-				xx = 0;
-				yy += font_h / 2;
-			}
-			else
-			{
-				Sint32 index = (text[i] - ' ') * (stride / 32);
-				for (Sint32 fy = 0; fy < font_h; fy+=2)
-				{
-					for (Sint32 fx = 0; fx < font_w; fx+=2)
-					{
-						if (getArrayBit(&font[index], fx + fy * font_w))
-						{
-							setPixel(surface, x + xx + fx/2, y + yy + fy/2, color);
-						}
-					}
-				}
-
-				xx += font_w / 2;
-			}
-		}
+		*width *= size * font_w;
+		*height *= size * font_h;
 	}
 	else
 	{
-		for (Sint32 i = 0; text[i]; i++)
+		*width *= font_w / 2;
+		*height *= font_h / 2;
+	}
+}
+
+static inline bool getArrayBit(Uint32 array[], Uint32 i)
+{
+	Uint32 index = i >> 5;
+	Uint32 shift = 31 - (i & 0b11111);
+	return (array[index] >> shift) & 1;
+}
+
+static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, char ch)
+{
+	const int border = 0;
+
+	Sint32 index = (ch - ' ') * (stride / 32);
+	if (x >= border && y >= border &&
+		x + size * font_w < surface->w - border &&
+		y + size * font_h < surface->h - border)
+	{
+		for (Sint32 fy = 0; fy < font_h; fy++)
+			for (Sint32 fx = 0; fx < font_w; fx++)
+				if (getArrayBit(&font[index], fx + fy * font_w))
+					for (Sint32 ix = 0; ix < size; ix++)
+						for (Sint32 iy = 0; iy < size; iy++)
+							setPixelUC(surface, x + fx * size + ix, y + fy * size + iy, color);
+	}
+	else if (x + size * font_w >= border && y + size * font_h >= border &&
+		x < surface->w - border && y < surface->h - border)
+	{
+		for (Sint32 fy = 0; fy < font_h; fy++)
+			for (Sint32 fx = 0; fx < font_w; fx++)
+				if (getArrayBit(&font[index], fx + fy * font_w))
+					for (Sint32 ix = 0; ix < size; ix++)
+						for (Sint32 iy = 0; iy < size; iy++)
+							setPixel(surface, x + fx * size + ix, y + fy * size + iy, color);
+	}
+}
+
+// Hacky way of reducing text size, samples top left of 2x2 pixel section
+static void drawCharZero(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 color, char ch)
+{
+	const int border = 0;
+
+	Sint32 index = (ch - ' ') * (stride / 32);
+	if (x >= border && y >= border &&
+		x + font_w / 2 < surface->w - border &&
+		y + font_h / 2 < surface->h - border)
+	{
+		for (Sint32 fy = 0; fy < font_h; fy += 2)
+			for (Sint32 fx = 0; fx < font_w; fx += 2)
+				if (getArrayBit(&font[index], fx + fy * font_w))
+					setPixelUC(surface, x + fx / 2, y + fy / 2, color);
+	}
+	else if (x + font_w / 2 >= border && y + font_h / 2 >= border &&
+		x < surface->w - border && y < surface->h - border)
+	{
+		for (Sint32 fy = 0; fy < font_h; fy += 2)
+			for (Sint32 fx = 0; fx < font_w; fx += 2)
+				if (getArrayBit(&font[index], fx + fy * font_w))
+					setPixel(surface, x + fx / 2, y + fy / 2, color);
+	}
+}
+
+static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, const char* text)
+{
+	Sint32 xx = 0;
+	Sint32 yy = 0;
+	for (Sint32 i = 0; text[i]; i++)
+	{
+		if (text[i] == '\n')
 		{
-
-			if (text[i] == '\n')
-			{
-				xx = 0;
-				yy += size * font_h;
-			}
+			xx = 0;
+			yy += (size ? size * font_h : font_h / 2);
+		}
+		else if (text[i] >= 127 || text[i] < ' '); // unknown
+		else
+		{
+			if (size > 0)
+				drawChar(surface, x + xx, y + yy, size, color, text[i]);
 			else
-			{
-				Sint32 index = (text[i] - ' ') * (stride / 32);
-				for (Sint32 fy = 0; fy < font_h; fy++)
-				{
-					for (Sint32 fx = 0; fx < font_w; fx++)
-					{
-						if (getArrayBit(&font[index], fx + fy * font_w))
-						{
-							for (Sint32 ix = 0; ix < size; ix++)
-								for (Sint32 iy = 0; iy < size; iy++)
-									setPixel(surface, x + xx + fx * size + ix, y + yy + fy * size + iy, color);
-						}
-					}
-				}
-
-				xx += size * font_w;
-			}
+				drawCharZero(surface, x + xx, y + yy, color, text[i]); 
+			xx += (size ? size * font_w : font_w / 2);
 		}
 	}
 }
 
-void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color, const char* fmt, ...)
+static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color, const char* fmt, ...)
 {
 	va_list prf0, prf1;
 	va_start(prf0, fmt);
