@@ -393,6 +393,8 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 				break;
 			}
 		}
+		if (ixl == w)
+			continue;
 
 		Sint32 ixr = w - 1;
 		for (; ixr >= 0; ixr--)
@@ -404,6 +406,8 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 				break;
 			}
 		}
+		if (ixr == -1)
+			continue;
 
 		if (((xx + ixl + yp * surface->w) & 1) == 1) // left alignment is important, right is not
 		{
@@ -620,6 +624,35 @@ static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uin
 		{
 			vsnprintf(buf, len, fmt, prf1);
 			drawText(surface, x, y, size, color, buf);
+			free(buf);
+		}
+	}
+
+	va_end(prf1);
+}
+
+static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char* fmt, ...)
+{
+	va_list prf0, prf1;
+	va_start(prf0, fmt);
+
+	va_copy(prf1, prf0);
+	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
+	va_end(prf0);
+
+	if (len <= 100)
+	{
+		char* smBuf[100];
+		vsnprintf(smBuf, 100, fmt, prf1);
+		getTextSize(smBuf, size, width, height);
+	}
+	else
+	{
+		char* buf = malloc(len);
+		if (buf)
+		{
+			vsnprintf(buf, len, fmt, prf1);
+			getTextSize(buf, size, width, height);
 			free(buf);
 		}
 	}

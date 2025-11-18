@@ -4,6 +4,24 @@
 //#define USE_AVX
 #include "graphics.h"
 
+void getMousePos(Sint32* mouseX, Sint32* mouseY)
+{
+	float x = 0, y = 0;
+	SDL_GetGlobalMouseState(&x, &y);
+	*mouseX = x;
+	*mouseY = y;
+}
+
+void getMousePosRel(SDL_Window* window, Sint32* mouseX, Sint32* mouseY)
+{
+	Sint32 mx, my;
+	getMousePos(&mx, &my);
+	Sint32 winX, winY;
+	SDL_GetWindowPosition(window, &winX, &winY);
+	*mouseX = mx - winX;
+	*mouseY = my - winY;
+}
+
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -15,8 +33,8 @@ int main()
 	pixFmt = SDL_GetPixelFormatDetails(surface->format);
 
 
-	float mouseX, mouseY;
-	SDL_GetMouseState(&mouseX, &mouseY);
+	Sint32 mouseX, mouseY;
+	Sint32 mouseXR, mouseYR;
 
 	Uint64 timer = SDL_GetTicks();
 	Uint32 fps = 0;
@@ -40,11 +58,8 @@ int main()
 				break;
 			}
 		}
-		SDL_GetGlobalMouseState(&mouseX, &mouseY);
-		int winX = 0, winY = 0;
-		SDL_GetWindowPosition(window, &winX, &winY);
-		mouseX -= winX;
-		mouseY -= winY;
+		getMousePos(&mouseX, &mouseY);
+		getMousePosRel(window, &mouseXR, &mouseYR);
 
 		Uint64 now = SDL_GetTicks();
 		Uint32 fpsScale = 1;
@@ -59,10 +74,15 @@ int main()
 
 		clearScreen(surface, rgb(0x00, 0x00, 0x3F));
 
-		drawCircle(surface, mouseX, mouseY, 100, rgb(0xFF, 0xFF, 0xFF));
+		Uint32 textW, textH;
+		getTextSizeF(1, &textW, &textH, "Mouse (%4d %4d)", mouseX, mouseY);
+		drawRect(surface, 10, 10, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 10, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse (%4d %4d)", mouseX, mouseY);
+
+
+		drawCircle(surface, mouseXR, mouseYR, 100, rgb(0xFF, 0xFF, 0xFF));
 
 		const char* text = "'<': signed/\nunsigned mismatch";
-		Uint32 textW, textH;
 
 		getTextSize(text, 0, &textW, &textH);
 		drawRect(surface, 10, 100, textW, textH, rgb(0x00, 0x00, 0x00));
