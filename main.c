@@ -1,7 +1,7 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
-//#define USE_AVX
+#define USE_SSE
 #include "graphics.h"
 
 void getMousePos(Sint32* mouseX, Sint32* mouseY)
@@ -31,7 +31,6 @@ int main()
 	SDL_Window* window = SDL_CreateWindow("SDL Test", width, height, SDL_WINDOW_RESIZABLE);
 	SDL_Surface* surface = SDL_GetWindowSurface(window);
 	pixFmt = SDL_GetPixelFormatDetails(surface->format);
-
 
 	Sint32 mouseX, mouseY;
 	Sint32 mouseXR, mouseYR;
@@ -115,6 +114,7 @@ int main()
 			drawText(surface, xoff, yoff, i, rgb(0xFF, 0xFF, 0xFF), text);
 			yoff += textH + 5;
 		}
+		
 
 		Uint32 colors[10];
 		colors[0] = rgb(0xFF, 0x00, 0x00);

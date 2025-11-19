@@ -31,55 +31,78 @@ inline static void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 col
 		;// printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
 }
 
-#ifdef USE_AVX
-inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
-{
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 16 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 24 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 32 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 40 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 48 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 56 + y * surface->w]), *color);
+#ifdef USE_SSE
+#if defined(_MSC_VER) && !defined(__clang__)
+#define SSE_BEGIN \
+    __m128 c128; \
+    c128.m128_u32[0] = color; \
+    c128.m128_u32[1] = color; \
+    c128.m128_u32[2] = color; \
+    c128.m128_u32[3] = color;
+#else
+#define SSE_BEGIN \
+    __m128 c128; \
+    DECLARE_ALIGNED(Uint32, cccc[4], 16); \
+    cccc[0] = color; \
+    cccc[1] = color; \
+    cccc[2] = color; \
+    cccc[3] = color; \
+    c128 = *(__m128 *)cccc;
+#endif
+#endif
 
-	//memcpy(&((Uint32*)surface->pixels)[x +  0 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x +  8 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 16 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 24 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 32 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 40 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 48 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 56 + y * surface->w], color, sizeof(*color));
+#ifdef USE_SSE
+inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
+{
+	// extreme alignment needed to not crash (16 bytes)
+	// https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_stream_ps&ig_expand=6562
+	// make sure caller passes aligned values
+	Uint32* pixels = ((Uint32*)surface->pixels + (x + y * surface->w));
+	_mm_stream_ps((float*)(pixels +  0), color);
+	_mm_stream_ps((float*)(pixels +  4), color);
+	_mm_stream_ps((float*)(pixels +  8), color);
+	_mm_stream_ps((float*)(pixels + 12), color);
+	_mm_stream_ps((float*)(pixels + 16), color);
+	_mm_stream_ps((float*)(pixels + 20), color);
+	_mm_stream_ps((float*)(pixels + 24), color);
+	_mm_stream_ps((float*)(pixels + 28), color);
+	_mm_stream_ps((float*)(pixels + 32), color);
+	_mm_stream_ps((float*)(pixels + 36), color);
+	_mm_stream_ps((float*)(pixels + 40), color);
+	_mm_stream_ps((float*)(pixels + 44), color);
+	_mm_stream_ps((float*)(pixels + 48), color);
+	_mm_stream_ps((float*)(pixels + 52), color);
+	_mm_stream_ps((float*)(pixels + 56), color);
+	_mm_stream_ps((float*)(pixels + 60), color);
 }
 
-inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 16 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 24 + y * surface->w]), *color);
-
-	//memcpy(&((Uint32*)surface->pixels)[x +  0 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x +  8 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 16 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 24 + y * surface->w], color, sizeof(*color));
+	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
+	_mm_stream_ps((float*)(pixels +  0), color);
+	_mm_stream_ps((float*)(pixels +  4), color);
+	_mm_stream_ps((float*)(pixels +  8), color);
+	_mm_stream_ps((float*)(pixels + 12), color);
+	_mm_stream_ps((float*)(pixels + 16), color);
+	_mm_stream_ps((float*)(pixels + 20), color);
+	_mm_stream_ps((float*)(pixels + 24), color);
+	_mm_stream_ps((float*)(pixels + 28), color);
 }
 
-inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 8 + y * surface->w]), *color);
-
-	//memcpy(&((Uint32*)surface->pixels)[x + 0 + y * surface->w], color, sizeof(*color));
-	//memcpy(&((Uint32*)surface->pixels)[x + 8 + y * surface->w], color, sizeof(*color));
+	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
+	_mm_stream_ps((float*)(pixels +  0), color);
+	_mm_stream_ps((float*)(pixels +  4), color);
+	_mm_stream_ps((float*)(pixels +  8), color);
+	_mm_stream_ps((float*)(pixels + 12), color);
 }
 
-inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m256i* color)
+inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
-	_mm256_storeu_si256((__m256i*)(&((Uint32*)surface->pixels)[x + 0 + y * surface->w]), *color);
-
-	//memcpy(&((Uint32*)surface->pixels)[x + y * surface->w], color, sizeof(*color));
+	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
+	_mm_stream_ps((float*)(pixels +  0), color);
+	_mm_stream_ps((float*)(pixels +  4), color);
 }
 #else
 inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
@@ -178,58 +201,59 @@ inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 co
 static void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
-	__m256i color256 = _mm256_set_epi64x(color64, color64, color64, color64);
+	SSE_BEGIN;
 
 	for (Uint32 iy = 0; iy < h; iy++)
 	{
-		setPixelUC(surface, x, y + iy, color);
-		bool align = ((x + (y + iy) * surface->w) & 1) == 1;
+		Sint32 align = (4 - ((x + (y + iy) * surface->w) & 0b11)) & 0b11;
+		for (Sint32 i = 0; i < align && i < w; i++)
+			setPixelUC(surface, x + i, y + iy, color);
 		for (Uint32 ix = align; ix < w;)
 		{
-			Uint32 width = w - ix;
-			if (width >= 64u)
+			Sint32 width = w - ix;
+			if (width >= 64)
 			{
-				#ifdef USE_AVX
-				setHLine64(surface, ix + x, iy + y, &color256);
+				#ifdef USE_SSE
+				setHLine64(surface, ix + x, iy + y, c128);
 				#else
 				setHLine64(surface, ix + x, iy + y, color64);
 				#endif
 				ix += 64;
 			}
-			else if (width >= 32u)
+			else if (width >= 32)
 			{
-				#ifdef USE_AVX
-				setHLine32(surface, ix + x, iy + y, &color256);
+				#ifdef USE_SSE
+				setHLine32(surface, ix + x, iy + y, c128);
 				#else
 				setHLine32(surface, ix + x, iy + y, color64);
 				#endif
 				ix += 32;
 			}
-			else if (width >= 16u)
+			else if (width >= 16)
 			{
-				#ifdef USE_AVX
-				setHLine16(surface, ix + x, iy + y, &color256);
+				#ifdef USE_SSE
+				setHLine16(surface, ix + x, iy + y, c128);
 				#else
 				setHLine16(surface, ix + x, iy + y, color64);
 				#endif
 				ix += 16;
 			}
-			else if (width >= 8u)
+			else if (width >= 8)
 			{
-				#ifdef USE_AVX
-				setHLine8(surface, ix + x, iy + y, &color256);
+				#ifdef USE_SSE
+				setHLine8(surface, ix + x, iy + y, c128);
 				#else
 				setHLine8(surface, ix + x, iy + y, color64);
 				#endif
 				ix += 8;
 			}
-			else if (width >= 4u)
+			else if (width >= 4)
 			{
 				setPixel2UC(surface, x + 0 + ix, y + iy, color64);
 				setPixel2UC(surface, x + 2 + ix, y + iy, color64);
 				ix += 4;
 			}
-			else if (width >= 2u)
+			else if (width >= 2)
 			{
 				setPixel2UC(surface, x + ix, y + iy, color64);
 				ix += 2;
@@ -283,15 +307,15 @@ static void clearScreen(SDL_Surface* surface, Uint32 color)
 	Sint32 wh = w * h;
 
 	Uint64 color64 = color | (Uint64)color << 32;
-	__m256i color256 = _mm256_set_epi64x(color64, color64, color64, color64);
+	SSE_BEGIN;
 
 	for (Sint32 i = 0; i < wh;)
 	{
 		Sint32 width = wh - i;
 		if (width >= 64)
 		{
-			#ifdef USE_AVX
-			setHLine64(surface, i, 0, &color256);
+			#ifdef USE_SSE
+			setHLine64(surface, i, 0, c128);
 			#else
 			setHLine64(surface, i, 0, color64);
 			#endif
@@ -299,8 +323,8 @@ static void clearScreen(SDL_Surface* surface, Uint32 color)
 		}
 		else if (width >= 32)
 		{
-			#ifdef USE_AVX
-			setHLine32(surface, i, 0, &color256);
+			#ifdef USE_SSE
+			setHLine32(surface, i, 0, c128);
 			#else
 			setHLine32(surface, i, 0, color64);
 			#endif
@@ -308,8 +332,8 @@ static void clearScreen(SDL_Surface* surface, Uint32 color)
 		}
 		else if (width >= 16)
 		{
-			#ifdef USE_AVX
-			setHLine16(surface, i, 0, &color256);
+			#ifdef USE_SSE
+			setHLine16(surface, i, 0, c128);
 			#else
 			setHLine16(surface, i, 0, color64);
 			#endif
@@ -317,8 +341,8 @@ static void clearScreen(SDL_Surface* surface, Uint32 color)
 		}
 		else if (i >= 8)
 		{
-			#ifdef USE_AVX
-			setHLine8(surface, i, 0, &color256);
+			#ifdef USE_SSE
+			setHLine8(surface, i, 0, c128);
 			#else
 			setHLine8(surface, i, 0, color64);
 			#endif
@@ -375,7 +399,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 	r *= r;
 
 	Uint64 color64 = color | (Uint64)color << 32;
-	__m256i color256 = _mm256_set_epi64x(color64, color64, color64, color64);
+	SSE_BEGIN
 
 	for (Sint32 iy = 0; iy < h; iy++)
 	{
@@ -409,18 +433,16 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 		if (ixr == -1)
 			continue;
 
-		if (((xx + ixl + yp * surface->w) & 1) == 1) // left alignment is important, right is not
-		{
-			setPixelUC(surface, xx + ixl, yp, color);
-			ixl++;
-		}
-		for (Sint32 ix = ixl; ix <= ixr; )
+		Sint32 align = (4 - ((xx + ixl + yp * surface->w) & 0b11)) & 0b11;
+		for (Sint32 i = 0; i < align && ixl + i <= ixr; i++)
+			setPixelUC(surface, xx + ixl + i, yp, color);
+		for (Sint32 ix = ixl + align; ix <= ixr; )
 		{
 			Sint32 width = ixr - 1 - ix;
 			if (width >= 64)
 			{
-				#ifdef USE_AVX
-				setHLine64(surface, xx + ix, yp, &color256);
+				#ifdef USE_SSE
+				setHLine64(surface, xx + ix, yp, c128);
 				#else
 				setHLine64(surface, xx + ix, yp, color64);
 				#endif
@@ -428,8 +450,8 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 			}
 			else if (width >= 32)
 			{
-				#ifdef USE_AVX
-				setHLine32(surface, xx + ix, yp, &color256);
+				#ifdef USE_SSE
+				setHLine32(surface, xx + ix, yp, c128);
 				#else
 				setHLine32(surface, xx + ix, yp, color64);
 				#endif
@@ -437,8 +459,8 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 			}
 			else if (width >= 16)
 			{
-				#ifdef USE_AVX
-				setHLine16(surface, xx + ix, yp, &color256);
+				#ifdef USE_SSE
+				setHLine16(surface, xx + ix, yp, c128);
 				#else
 				setHLine16(surface, xx + ix, yp, color64);
 				#endif
@@ -446,8 +468,8 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 			}
 			else if (width >= 8)
 			{
-				#ifdef USE_AVX
-				setHLine8(surface, xx + ix, yp, &color256);
+				#ifdef USE_SSE
+				setHLine8(surface, xx + ix, yp, c128);
 				#else
 				setHLine8(surface, xx + ix, yp, color64);
 				#endif
