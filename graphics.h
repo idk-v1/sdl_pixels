@@ -107,13 +107,11 @@ inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 co
 #else
 inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	//color = 0xFFFF0000FFFF0000;
-
-	setPixel2UC(surface, x + 0, y, color);
-	setPixel2UC(surface, x + 2, y, color);
-	setPixel2UC(surface, x + 4, y, color);
-	setPixel2UC(surface, x + 6, y, color);
-	setPixel2UC(surface, x + 8, y, color);
+	setPixel2UC(surface, x +  0, y, color);
+	setPixel2UC(surface, x +  2, y, color);
+	setPixel2UC(surface, x +  4, y, color);
+	setPixel2UC(surface, x +  6, y, color);
+	setPixel2UC(surface, x +  8, y, color);
 	setPixel2UC(surface, x + 10, y, color);
 	setPixel2UC(surface, x + 12, y, color);
 	setPixel2UC(surface, x + 14, y, color);
@@ -141,19 +139,15 @@ inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 c
 	setPixel2UC(surface, x + 58, y, color);
 	setPixel2UC(surface, x + 60, y, color);
 	setPixel2UC(surface, x + 62, y, color);
-
-	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
 inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	//color = 0xFFFF7F00FFFF7F00;
-
-	setPixel2UC(surface, x + 0, y, color);
-	setPixel2UC(surface, x + 2, y, color);
-	setPixel2UC(surface, x + 4, y, color);
-	setPixel2UC(surface, x + 6, y, color);
-	setPixel2UC(surface, x + 8, y, color);
+	setPixel2UC(surface, x +  0, y, color);
+	setPixel2UC(surface, x +  2, y, color);
+	setPixel2UC(surface, x +  4, y, color);
+	setPixel2UC(surface, x +  6, y, color);
+	setPixel2UC(surface, x +  8, y, color);
 	setPixel2UC(surface, x + 10, y, color);
 	setPixel2UC(surface, x + 12, y, color);
 	setPixel2UC(surface, x + 14, y, color);
@@ -165,105 +159,101 @@ inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 c
 	setPixel2UC(surface, x + 26, y, color);
 	setPixel2UC(surface, x + 28, y, color);
 	setPixel2UC(surface, x + 30, y, color);
-
-	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
 inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	//color = 0xFFFFFF00FFFFFF00;
-
-	setPixel2UC(surface, x + 0, y, color);
-	setPixel2UC(surface, x + 2, y, color);
-	setPixel2UC(surface, x + 4, y, color);
-	setPixel2UC(surface, x + 6, y, color);
-	setPixel2UC(surface, x + 8, y, color);
+	setPixel2UC(surface, x +  0, y, color);
+	setPixel2UC(surface, x +  2, y, color);
+	setPixel2UC(surface, x +  4, y, color);
+	setPixel2UC(surface, x +  6, y, color);
+	setPixel2UC(surface, x +  8, y, color);
 	setPixel2UC(surface, x + 10, y, color);
 	setPixel2UC(surface, x + 12, y, color);
 	setPixel2UC(surface, x + 14, y, color);
-
-	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 
 inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
-	//color = 0xFF00FF00FF00FF00;
-
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
 	setPixel2UC(surface, x + 4, y, color);
 	setPixel2UC(surface, x + 6, y, color);
-
-	//setPixelUC(surface, x, y, 0xFFFF00FF);
 }
 #endif
 
-static void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
+static inline void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
 	SSE_BEGIN;
 
+	Sint32 align = (4 - ((x + y * surface->w) & 0b11)) & 0b11;
+	for (Sint32 i = 0; i < align && i < w; i++)
+		setPixelUC(surface, x + i, y, color);
+
+	for (Uint32 ix = align; ix < w;)
+	{
+		Sint32 width = w - ix;
+		if (width >= 64)
+		{
+#ifdef USE_SSE
+			setHLine64(surface, ix + x, y, c128);
+#else
+			setHLine64(surface, ix + x, y, color64);
+#endif
+			ix += 64;
+		}
+		else if (width >= 32)
+		{
+#ifdef USE_SSE
+			setHLine32(surface, ix + x, y, c128);
+#else
+			setHLine32(surface, ix + x, y, color64);
+#endif
+			ix += 32;
+		}
+		else if (width >= 16)
+		{
+#ifdef USE_SSE
+			setHLine16(surface, ix + x, y, c128);
+#else
+			setHLine16(surface, ix + x, y, color64);
+#endif
+			ix += 16;
+		}
+		else if (width >= 8)
+		{
+#ifdef USE_SSE
+			setHLine8(surface, ix + x, y, c128);
+#else
+			setHLine8(surface, ix + x, y, color64);
+#endif
+			ix += 8;
+		}
+		else if (width >= 4)
+		{
+			setPixel2UC(surface, x + 0 + ix, y, color64);
+			setPixel2UC(surface, x + 2 + ix, y, color64);
+			ix += 4;
+		}
+		else if (width >= 2)
+		{
+			setPixel2UC(surface, x + ix, y, color64);
+			ix += 2;
+		}
+		else
+		{
+			setPixelUC(surface, x + ix, y, color);
+			ix++;
+		}
+	}
+}
+
+static void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
+{
 	for (Uint32 iy = 0; iy < h; iy++)
 	{
-		Sint32 align = (4 - ((x + (y + iy) * surface->w) & 0b11)) & 0b11;
-		for (Sint32 i = 0; i < align && i < w; i++)
-			setPixelUC(surface, x + i, y + iy, color);
-		for (Uint32 ix = align; ix < w;)
-		{
-			Sint32 width = w - ix;
-			if (width >= 64)
-			{
-				#ifdef USE_SSE
-				setHLine64(surface, ix + x, iy + y, c128);
-				#else
-				setHLine64(surface, ix + x, iy + y, color64);
-				#endif
-				ix += 64;
-			}
-			else if (width >= 32)
-			{
-				#ifdef USE_SSE
-				setHLine32(surface, ix + x, iy + y, c128);
-				#else
-				setHLine32(surface, ix + x, iy + y, color64);
-				#endif
-				ix += 32;
-			}
-			else if (width >= 16)
-			{
-				#ifdef USE_SSE
-				setHLine16(surface, ix + x, iy + y, c128);
-				#else
-				setHLine16(surface, ix + x, iy + y, color64);
-				#endif
-				ix += 16;
-			}
-			else if (width >= 8)
-			{
-				#ifdef USE_SSE
-				setHLine8(surface, ix + x, iy + y, c128);
-				#else
-				setHLine8(surface, ix + x, iy + y, color64);
-				#endif
-				ix += 8;
-			}
-			else if (width >= 4)
-			{
-				setPixel2UC(surface, x + 0 + ix, y + iy, color64);
-				setPixel2UC(surface, x + 2 + ix, y + iy, color64);
-				ix += 4;
-			}
-			else if (width >= 2)
-			{
-				setPixel2UC(surface, x + ix, y + iy, color64);
-				ix += 2;
-			}
-			else
-			{
-				setPixelUC(surface, x + ix, y + iy, color);
-				ix++;
-			}
-		}
+		setLine(surface, x, y + iy, w, color);
 	}
 }
 
@@ -304,67 +294,8 @@ static void clearScreen(SDL_Surface* surface, Uint32 color)
 {
 	Sint32 w = surface->w;
 	Sint32 h = surface->h;
-	Sint32 wh = w * h;
 
-	Uint64 color64 = color | (Uint64)color << 32;
-	SSE_BEGIN;
-
-	for (Sint32 i = 0; i < wh;)
-	{
-		Sint32 width = wh - i;
-		if (width >= 64)
-		{
-			#ifdef USE_SSE
-			setHLine64(surface, i, 0, c128);
-			#else
-			setHLine64(surface, i, 0, color64);
-			#endif
-			i += 64;
-		}
-		else if (width >= 32)
-		{
-			#ifdef USE_SSE
-			setHLine32(surface, i, 0, c128);
-			#else
-			setHLine32(surface, i, 0, color64);
-			#endif
-			i += 32;
-		}
-		else if (width >= 16)
-		{
-			#ifdef USE_SSE
-			setHLine16(surface, i, 0, c128);
-			#else
-			setHLine16(surface, i, 0, color64);
-			#endif
-			i += 16;
-		}
-		else if (i >= 8)
-		{
-			#ifdef USE_SSE
-			setHLine8(surface, i, 0, c128);
-			#else
-			setHLine8(surface, i, 0, color64);
-			#endif
-			i += 8;
-		}
-		else if (width >= 4)
-		{
-			setPixel2UC(surface, i, 0, color64);
-			setPixel2UC(surface, i + 2, 0, color64);
-			i += 4;
-		}
-		else if (width >= 2)
-		{
-			setPixel2UC(surface, i, 0, color64);
-			i += 2;
-		}
-		else
-		{
-			setPixelUC(surface, i, 0, color);
-			i++;
-		}
-	}
+	setLine(surface, 0, 0, w * h, color);
 }
 
 static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color)
@@ -398,9 +329,6 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 
 	r *= r;
 
-	Uint64 color64 = color | (Uint64)color << 32;
-	SSE_BEGIN
-
 	for (Sint32 iy = 0; iy < h; iy++)
 	{
 		Sint32 yp = yy + iy;
@@ -433,65 +361,9 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 		if (ixr == -1)
 			continue;
 
-		Sint32 align = (4 - ((xx + ixl + yp * surface->w) & 0b11)) & 0b11;
-		for (Sint32 i = 0; i < align && ixl + i <= ixr; i++)
-			setPixelUC(surface, xx + ixl + i, yp, color);
-		for (Sint32 ix = ixl + align; ix <= ixr; )
-		{
-			Sint32 width = ixr - 1 - ix;
-			if (width >= 64)
-			{
-				#ifdef USE_SSE
-				setHLine64(surface, xx + ix, yp, c128);
-				#else
-				setHLine64(surface, xx + ix, yp, color64);
-				#endif
-				ix += 64;
-			}
-			else if (width >= 32)
-			{
-				#ifdef USE_SSE
-				setHLine32(surface, xx + ix, yp, c128);
-				#else
-				setHLine32(surface, xx + ix, yp, color64);
-				#endif
-				ix += 32;
-			}
-			else if (width >= 16)
-			{
-				#ifdef USE_SSE
-				setHLine16(surface, xx + ix, yp, c128);
-				#else
-				setHLine16(surface, xx + ix, yp, color64);
-				#endif
-				ix += 16;
-			}
-			else if (width >= 8)
-			{
-				#ifdef USE_SSE
-				setHLine8(surface, xx + ix, yp, c128);
-				#else
-				setHLine8(surface, xx + ix, yp, color64);
-				#endif
-				ix += 8;
-			}
-			else if (width >= 4)
-			{
-				setPixel2UC(surface, xx + ix + 0, yp, color64);
-				setPixel2UC(surface, xx + ix + 2, yp, color64);
-				ix += 4;
-			}
-			else if (width >= 2)
-			{
-				setPixel2UC(surface, xx + ix, yp, color64);
-				ix += 2;
-			}
-			else
-			{
-				setPixelUC(surface, xx + ix, yp, color);
-				ix++;
-			}
-		}
+		Sint32 width = ixr - 1 - ixl;
+		if (width > 0)
+			setLine(surface, xx + ixl, yp, width, color);
 	}
 }
 

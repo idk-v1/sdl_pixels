@@ -39,9 +39,22 @@ int main()
 	Uint64 deltaTime = 0;
 	Uint64 ups = 30;
 	Uint64 lastFPSTime = SDL_GetTicks();
+	Uint32 fpsCount = 0;
 	Uint32 fps = 0;
 
 	Uint64 ticks = 0;
+
+	Uint32 colors[10];
+	colors[0] = rgb(0xFF, 0x00, 0x00);
+	colors[1] = rgb(0xFF, 0x7F, 0x00);
+	colors[2] = rgb(0xFF, 0xFF, 0x00);
+	colors[3] = rgb(0x00, 0xFF, 0x00);
+	colors[4] = rgb(0x00, 0xFF, 0xFF);
+	colors[5] = rgb(0x00, 0x7F, 0xFF);
+	colors[6] = rgb(0x00, 0x00, 0xFF);
+	colors[7] = rgb(0x7F, 0x00, 0xFF);
+	colors[8] = rgb(0xFF, 0x00, 0xFF);
+	colors[9] = rgb(0xFF, 0x00, 0x7F);
 
 	bool running = true; 
 	while (running)
@@ -79,61 +92,21 @@ int main()
 		if (now - lastFPSTime >= 1000 / fpsScale)
 		{
 			lastFPSTime = now;
-			char title[50];
-			snprintf(title, 50, "SDL Test | %u x %u | %u fps", width, height, fps * fpsScale);
-			SDL_SetWindowTitle(window, title);
-			fps = 0;
+			fps = fpsCount * fpsScale;
+			fpsCount = 0;
 		}
 
 		clearScreen(surface, rgb(0x00, 0x00, 0x3F));
 
-		Uint32 textW, textH;
-
-		getTextSizeF(1, &textW, &textH, "Mouse     (%4d %4d)", mouseX, mouseY);
-		drawRect(surface, 10, 30, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 30, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%4d %4d)", mouseX, mouseY);
-
-		getTextSizeF(1, &textW, &textH, "Mouse Rel (%4d %4d)", mouseXR, mouseYR);
-		drawRect(surface, 10, 50, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 50, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%4d %4d)", mouseXR, mouseYR);
-
-
-		drawCircle(surface, mouseXR, mouseYR, 100, rgb(0xFF, 0xFF, 0xFF));
-
-		const char* text = "'<': signed/\nunsigned mismatch";
-
-		Sint32 yoff = 100;
-		for (Sint32 i = 0; i < 3; i++)
-		{
-			getTextSizeF(i, &textW, &textH, "%d", i);
-			drawTextF(surface, 10, yoff, i, rgb(0xFF, 0xFF, 0xFF), "%d", i);
-			Sint32 xoff = 15 + textW;
-
-			getTextSize(text, i, &textW, &textH);
-			drawRect(surface, xoff, yoff, textW, textH, rgb(0x00, 0x00, 0x00));
-			drawText(surface, xoff, yoff, i, rgb(0xFF, 0xFF, 0xFF), text);
-			yoff += textH + 5;
-		}
+		Uint32 textW, textH;		
 		
-
-		Uint32 colors[10];
-		colors[0] = rgb(0xFF, 0x00, 0x00);
-		colors[1] = rgb(0xFF, 0x7F, 0x00);
-		colors[2] = rgb(0xFF, 0xFF, 0x00);
-		colors[3] = rgb(0x00, 0xFF, 0x00);
-		colors[4] = rgb(0x00, 0xFF, 0xFF);
-		colors[5] = rgb(0x00, 0x7F, 0xFF);
-		colors[6] = rgb(0x00, 0x00, 0xFF);
-		colors[7] = rgb(0x7F, 0x00, 0xFF);
-		colors[8] = rgb(0xFF, 0x00, 0xFF);
-		colors[9] = rgb(0xFF, 0x00, 0x7F);
-
+		
 		// basically drawText, but rainbow
 		Sint32 textX = 0;
 		Sint32 textY = 0;
 		for (Sint32 i = ' ' + 1; i < 127; i++)
 		{
-			drawChar(surface, 10 + textX, 250 + textY, 2, colors[(ticks / 2 + i) % 10], i);
+			drawChar(surface, 10 + textX, 275 + textY, 2, colors[9 - (ticks / 2 + textX / font_w / 2 + textY / font_h / 2) % 10], i);
 			if ((i - ' ') % 24 == 0 && (i - ' '))
 			{
 				textY += font_h * 2;
@@ -144,9 +117,31 @@ int main()
 				textX += font_w * 2;
 			}
 		}
+
+		// Info display
+		getTextSizeF(1, &textW, &textH, "FPS       (%11u)", fps);
+		drawRect(surface, 10, 0, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 0, 1, rgb(0xFF, 0xFF, 0xFF), "FPS       (%11u)", fps);
+
+		getTextSizeF(1, &textW, &textH, "Size      (%5d %5d)", width, height);
+		drawRect(surface, 10, 20, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 20, 1, rgb(0xFF, 0xFF, 0xFF), "Size      (%5d %5d)", width, height);
+
+		getTextSizeF(1, &textW, &textH, "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
+		drawRect(surface, 10, 40, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 40, 1, rgb(0xFF, 0xFF, 0xFF), "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
+
+		getTextSizeF(1, &textW, &textH, "Mouse     (%+5d %+5d)", mouseX, mouseY);
+		drawRect(surface, 10, 60, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 60, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%+5d %+5d)", mouseX, mouseY);
+
+		getTextSizeF(1, &textW, &textH, "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
+		drawRect(surface, 10, 80, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 80, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
 		
+
 		SDL_UpdateWindowSurface(window);
-		fps++;
+		fpsCount++;
 	}
 
 	SDL_DestroyWindow(window);
