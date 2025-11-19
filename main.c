@@ -36,8 +36,13 @@ int main()
 	Sint32 mouseX, mouseY;
 	Sint32 mouseXR, mouseYR;
 
-	Uint64 timer = SDL_GetTicks();
+	Uint64 lastTime = SDL_GetTicks();
+	Uint64 deltaTime = 0;
+	Uint64 ups = 30;
+	Uint64 lastFPSTime = SDL_GetTicks();
 	Uint32 fps = 0;
+
+	Uint64 ticks = 0;
 
 	bool running = true; 
 	while (running)
@@ -62,10 +67,19 @@ int main()
 		getMousePosRel(window, &mouseXR, &mouseYR);
 
 		Uint64 now = SDL_GetTicks();
-		Uint32 fpsScale = 1;
-		if (now - timer >= 1000 / fpsScale)
+
+		deltaTime += now - lastTime;
+		while (deltaTime >= 1000 / ups)
 		{
-			timer = now;
+			deltaTime -= 1000 / ups;
+			ticks++;
+		}
+		lastTime = now;
+
+		Uint32 fpsScale = 1;
+		if (now - lastFPSTime >= 1000 / fpsScale)
+		{
+			lastFPSTime = now;
 			char title[50];
 			snprintf(title, 50, "SDL Test | %u x %u | %u fps", width, height, fps * fpsScale);
 			SDL_SetWindowTitle(window, title);
@@ -75,26 +89,32 @@ int main()
 		clearScreen(surface, rgb(0x00, 0x00, 0x3F));
 
 		Uint32 textW, textH;
-		getTextSizeF(1, &textW, &textH, "Mouse (%4d %4d)", mouseX, mouseY);
-		drawRect(surface, 10, 10, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 10, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse (%4d %4d)", mouseX, mouseY);
+
+		getTextSizeF(1, &textW, &textH, "Mouse     (%4d %4d)", mouseX, mouseY);
+		drawRect(surface, 10, 30, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 30, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%4d %4d)", mouseX, mouseY);
+
+		getTextSizeF(1, &textW, &textH, "Mouse Rel (%4d %4d)", mouseXR, mouseYR);
+		drawRect(surface, 10, 50, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 50, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%4d %4d)", mouseXR, mouseYR);
 
 
 		drawCircle(surface, mouseXR, mouseYR, 100, rgb(0xFF, 0xFF, 0xFF));
 
 		const char* text = "'<': signed/\nunsigned mismatch";
 
-		getTextSize(text, 0, &textW, &textH);
-		drawRect(surface, 10, 100, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawText(surface, 10, 100, 0, rgb(0xFF, 0xFF, 0xFF), text);
+		Sint32 yoff = 100;
+		for (Sint32 i = 0; i < 3; i++)
+		{
+			getTextSizeF(i, &textW, &textH, "%d", i);
+			drawTextF(surface, 10, yoff, i, rgb(0xFF, 0xFF, 0xFF), "%d", i);
+			Sint32 xoff = 15 + textW;
 
-		getTextSize(text, 1, &textW, &textH);
-		drawRect(surface, 10, 125, textW, textH, rgb(0, 0, 0));
-		drawText(surface, 10, 125, 1, rgb(0xFF, 0xFF, 0xFF), text);
-
-		getTextSize(text, 2, &textW, &textH);
-		drawRect(surface, 10, 175, textW, textH, rgb(0, 0, 0));
-		drawText(surface, 10, 175, 2, rgb(0xFF, 0xFF, 0xFF), text);
+			getTextSize(text, i, &textW, &textH);
+			drawRect(surface, xoff, yoff, textW, textH, rgb(0x00, 0x00, 0x00));
+			drawText(surface, xoff, yoff, i, rgb(0xFF, 0xFF, 0xFF), text);
+			yoff += textH + 5;
+		}
 
 		Uint32 colors[10];
 		colors[0] = rgb(0xFF, 0x00, 0x00);
@@ -113,7 +133,7 @@ int main()
 		Sint32 textY = 0;
 		for (Sint32 i = ' ' + 1; i < 127; i++)
 		{
-			drawChar(surface, 10 + textX, 250 + textY, 2, colors[i % 10], i);
+			drawChar(surface, 10 + textX, 250 + textY, 2, colors[(ticks / 2 + i) % 10], i);
 			if ((i - ' ') % 24 == 0 && (i - ' '))
 			{
 				textY += font_h * 2;
