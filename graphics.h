@@ -424,54 +424,54 @@ static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 {
 	const int border = 0;
 
-	Sint32 index = (ch - ' ') * (stride / 32);
-	if (x >= border && y >= border &&
-		x + size * font_w < surface->w - border &&
-		y + size * font_h < surface->h - border)
+	if (size)
 	{
-		for (Sint32 fy = 0; fy < font_h; fy++)
-			for (Sint32 fx = 0; fx < font_w; fx++)
-				if (getArrayBit(&font[index], fx + fy * font_w))
-					for (Sint32 ix = 0; ix < size; ix++)
-						for (Sint32 iy = 0; iy < size; iy++)
-							setPixelUC(surface, x + fx * size + ix, y + fy * size + iy, color);
+		Sint32 index = (ch - ' ') * (stride / 32);
+		if (x >= border && y >= border &&
+			x + size * font_w < surface->w - border &&
+			y + size * font_h < surface->h - border)
+		{
+			for (Sint32 fy = 0; fy < font_h; fy++)
+				for (Sint32 fx = 0; fx < font_w; fx++)
+					if (getArrayBit(&font[index], fx + fy * font_w))
+						for (Sint32 ix = 0; ix < size; ix++)
+							for (Sint32 iy = 0; iy < size; iy++)
+								setPixelUC(surface, x + fx * size + ix, y + fy * size + iy, color);
+		}
+		else if (x + size * font_w >= border && y + size * font_h >= border &&
+			x < surface->w - border && y < surface->h - border)
+		{
+			for (Sint32 fy = 0; fy < font_h; fy++)
+				for (Sint32 fx = 0; fx < font_w; fx++)
+					if (getArrayBit(&font[index], fx + fy * font_w))
+						for (Sint32 ix = 0; ix < size; ix++)
+							for (Sint32 iy = 0; iy < size; iy++)
+								setPixel(surface, x + fx * size + ix, y + fy * size + iy, color);
+		}
 	}
-	else if (x + size * font_w >= border && y + size * font_h >= border &&
-		x < surface->w - border && y < surface->h - border)
+	else // Hacky way of reducing text size, samples top left of 2x2 pixel section
 	{
-		for (Sint32 fy = 0; fy < font_h; fy++)
-			for (Sint32 fx = 0; fx < font_w; fx++)
-				if (getArrayBit(&font[index], fx + fy * font_w))
-					for (Sint32 ix = 0; ix < size; ix++)
-						for (Sint32 iy = 0; iy < size; iy++)
-							setPixel(surface, x + fx * size + ix, y + fy * size + iy, color);
+		Sint32 index = (ch - ' ') * (stride / 32);
+		if (x >= border && y >= border &&
+			x + font_w / 2 < surface->w - border &&
+			y + font_h / 2 < surface->h - border)
+		{
+			for (Sint32 fy = 0; fy < font_h; fy += 2)
+				for (Sint32 fx = 0; fx < font_w; fx += 2)
+					if (getArrayBit(&font[index], fx + fy * font_w))
+						setPixelUC(surface, x + fx / 2, y + fy / 2, color);
+		}
+		else if (x + font_w / 2 >= border && y + font_h / 2 >= border &&
+			x < surface->w - border && y < surface->h - border)
+		{
+			for (Sint32 fy = 0; fy < font_h; fy += 2)
+				for (Sint32 fx = 0; fx < font_w; fx += 2)
+					if (getArrayBit(&font[index], fx + fy * font_w))
+						setPixel(surface, x + fx / 2, y + fy / 2, color);
+		}
 	}
 }
 
-// Hacky way of reducing text size, samples top left of 2x2 pixel section
-static void drawCharZero(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 color, char ch)
-{
-	const int border = 0;
-
-	Sint32 index = (ch - ' ') * (stride / 32);
-	if (x >= border && y >= border &&
-		x + font_w / 2 < surface->w - border &&
-		y + font_h / 2 < surface->h - border)
-	{
-		for (Sint32 fy = 0; fy < font_h; fy += 2)
-			for (Sint32 fx = 0; fx < font_w; fx += 2)
-				if (getArrayBit(&font[index], fx + fy * font_w))
-					setPixelUC(surface, x + fx / 2, y + fy / 2, color);
-	}
-	else if (x + font_w / 2 >= border && y + font_h / 2 >= border &&
-		x < surface->w - border && y < surface->h - border)
-	{
-		for (Sint32 fy = 0; fy < font_h; fy += 2)
-			for (Sint32 fx = 0; fx < font_w; fx += 2)
-				if (getArrayBit(&font[index], fx + fy * font_w))
-					setPixel(surface, x + fx / 2, y + fy / 2, color);
-	}
-}
 
 static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, const char* text)
 {
@@ -484,13 +484,9 @@ static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 			xx = 0;
 			yy += (size ? size * font_h : font_h / 2);
 		}
-		else if (text[i] >= 127 || text[i] < ' '); // unknown
-		else
+		else if (text[i] < 127 && text[i] >= ' ')
 		{
-			if (size > 0)
-				drawChar(surface, x + xx, y + yy, size, color, text[i]);
-			else
-				drawCharZero(surface, x + xx, y + yy, color, text[i]); 
+			drawChar(surface, x + xx, y + yy, size, color, text[i]);
 			xx += (size ? size * font_w : font_w / 2);
 		}
 	}
