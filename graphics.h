@@ -290,6 +290,11 @@ static void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 
 	setRect(surface, x, y, w, h, color);
 }
 
+static void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 color)
+{
+	drawRect(surface, x - w / 2.f + w * alignX / 2.f, y - h / 2.f + h * alignY / 2.f, w, h, color);
+}
+
 static void clearScreen(SDL_Surface* surface, Uint32 color)
 {
 	Sint32 w = surface->w;
@@ -367,6 +372,10 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 	}
 }
 
+static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 r, Uint32 color)
+{
+	drawCircle(surface, x - r + r * alignX, y - r + r * alignY, r, color);
+}
 
 #include "bulletinV1_font.h"
 
@@ -472,6 +481,13 @@ static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 	}
 }
 
+static void drawCharA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 size, Uint32 color, char ch)
+{
+	drawChar(surface, 
+		x - (size ? size * font_w : font_w / 2) / 2.f + (size ? size * font_w : font_w / 2) / 2.f * alignX,
+		y - (size ? size * font_h : font_h / 2) / 2.f + (size ? size * font_h : font_h / 2) / 2.f * alignY, 
+		size, color, ch);
+}
 
 static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, const char* text)
 {
@@ -490,6 +506,14 @@ static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 			xx += (size ? size * font_w : font_w / 2);
 		}
 	}
+}
+
+static void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 size, Uint32 color, const char* text)
+{
+	drawText(surface,
+		x - (size ? size * font_w : font_w / 2) / 2.f + (size ? size * font_w : font_w / 2) / 2.f * alignX,
+		y - (size ? size * font_h : font_h / 2) / 2.f + (size ? size * font_h : font_h / 2) / 2.f * alignY,
+		size, color, text);
 }
 
 static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color, const char* fmt, ...)
@@ -514,6 +538,35 @@ static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uin
 		{
 			vsnprintf(buf, len, fmt, prf1);
 			drawText(surface, x, y, size, color, buf);
+			free(buf);
+		}
+	}
+
+	va_end(prf1);
+}
+
+static void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 size, Uint32 color, const char* fmt, ...)
+{
+	va_list prf0, prf1;
+	va_start(prf0, fmt);
+
+	va_copy(prf1, prf0);
+	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
+	va_end(prf0);
+
+	if (len <= 100)
+	{
+		char* smBuf[100];
+		vsnprintf(smBuf, 100, fmt, prf1);
+		drawTextA(surface, x, y, alignX, alignY, size, color, smBuf);
+	}
+	else
+	{
+		char* buf = malloc(len);
+		if (buf)
+		{
+			vsnprintf(buf, len, fmt, prf1);
+			drawTextA(surface, x, y, alignX, alignY, size, color, buf);
 			free(buf);
 		}
 	}
