@@ -510,9 +510,12 @@ static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 
 static void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 size, Uint32 color, const char* text)
 {
+	Uint32 width, height;
+	getTextSize(text, size, &width, &height);
+
 	drawText(surface,
-		x - (size ? size * font_w : font_w / 2) / 2.f + (size ? size * font_w : font_w / 2) / 2.f * alignX,
-		y - (size ? size * font_h : font_h / 2) / 2.f + (size ? size * font_h : font_h / 2) / 2.f * alignY,
+		x - width / 2.f + width / 2.f * alignX,
+		y - height / 2.f + height / 2.f * alignY,
 		size, color, text);
 }
 
