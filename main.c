@@ -28,7 +28,7 @@ void drawKey(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 w, Uint32 h, Uint3
 {
 	static int count = 0;
 	count++;
-	drawRectA(surface, x, y, 0, 0, w, h, rgb(0x0F, 0x0F, 0x0F));
+	drawRectA(surface, x, y, 0, 0, w, h, rgb(0x00, 0x00, 0x00));
 	drawTextA(surface, x, y, 0, 0, fontSize, colors[(ticks / 2 + x / 50 + y / 50) % 10], key);
 }
 
@@ -119,7 +119,7 @@ int main()
 			Sint32 y = 200;
 			Sint32 pad = 5;
 
-			drawRect(surface, x - pad, y - pad, 815, 259, rgb(0x00, 0x00, 0x00));
+			drawRect(surface, x - pad, y - pad, 815, 259, rgb(0x07, 0x07, 0x07));
 			x = 50;
 			y += 12;
 
@@ -167,23 +167,23 @@ int main()
 			x = 50 + 40 / 2 / 2;
 			y += (keyHR + keyHR) / 2 + pad;
 			
-			drawKey(surface, x, y,    60, keyHR, 0, "Tab", ticks); x += (keyWR +   60) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "Q", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "W", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "E", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "R", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "T", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "Y", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "U", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "I", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "O", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "P", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "[", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "]", ticks);   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "\\", ticks);  x += (keyWR + keyWN) / 2 + pad + 1;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "7", ticks);   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "8", ticks);   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "9", ticks);   x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
+			drawKey(surface, x, y,    60, keyHR, 0, "Tab", ticks);    x += (keyWR +   60) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "Q", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "W", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "E", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "R", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "T", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "Y", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "U", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "I", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "O", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "P", ticks);      x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "{\n[", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "}\n]", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "|\n\\", ticks);  x += (keyWR + keyWN) / 2 + pad + 1;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "7", ticks);      x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "8", ticks);      x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "9", ticks);      x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
 			drawKey(surface, x, y, keyWN, keyHN * 2 + pad, 1, "\n+", ticks);
 			x = 50 + 60 / 2 / 2;
 			y -= keyHN / 2 + pad / 2 + 1;
