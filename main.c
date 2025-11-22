@@ -22,10 +22,14 @@ void getMousePosRel(SDL_Window* window, Sint32* mouseX, Sint32* mouseY)
 	*mouseY = my - winY;
 }
 
-void drawKey(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 w, Uint32 h, Uint32 fontSize, const char* key)
+Uint32 colors[10];
+
+void drawKey(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 w, Uint32 h, Uint32 fontSize, const char* key, Uint64 ticks)
 {
+	static int count = 0;
+	count++;
 	drawRectA(surface, x, y, 0, 0, w, h, rgb(0x0F, 0x0F, 0x0F));
-	drawTextA(surface, x, y, 0, 0, fontSize, rgb(0xFF, 0xFF, 0xFF), key);
+	drawTextA(surface, x, y, 0, 0, fontSize, colors[(ticks / 2 + x / 50 + y / 50) % 10], key);
 }
 
 int main()
@@ -50,7 +54,6 @@ int main()
 
 	Uint64 ticks = 0;
 
-	Uint32 colors[10];
 	colors[0] = rgb(0xFF, 0x00, 0x00);
 	colors[1] = rgb(0xFF, 0x7F, 0x00);
 	colors[2] = rgb(0xFF, 0xFF, 0x00);
@@ -140,147 +143,147 @@ int main()
 			x = 50;
 			y += 12;
 
-			drawKey(surface, x, y, keyWR, keyHF, 0, "Esc");  x += (keyWR + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F1");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F2");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F3");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F4");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F5");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F6");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F7");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F8");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F9");   x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F10");  x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F11");  x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "F12");  x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "Prt");  x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "Ins");  x += (keyWR + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHF, 0, "Del");  x += (keyWR + keyWF) / 2 + pad + 2;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "Home"); x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "End");  x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "PgUp"); x += (keyWF + keyWF) / 2 + pad;
-			drawKey(surface, x, y, keyWF, keyHF, 0, "PgDn");
+			drawKey(surface, x, y, keyWR, keyHF, 0, "Esc", ticks);   x += (keyWR + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F1", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F2", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F3", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F4", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F5", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F6", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F7", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F8", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F9", ticks);    x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F10", ticks);   x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F11", ticks);   x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "F12", ticks);   x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "PrtSc", ticks); x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "Ins", ticks);   x += (keyWR + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHF, 0, "Del", ticks);   x += (keyWR + keyWF) / 2 + pad + 2;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "Home", ticks);  x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "End", ticks);   x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "PgUp", ticks);  x += (keyWF + keyWF) / 2 + pad;
+			drawKey(surface, x, y, keyWF, keyHF, 0, "PgDn", ticks);
 			x = 50;
 			y += (keyHF + keyHR) / 2 + pad;
 
-			drawKey(surface, x, y, keyWR, keyHR, 1, "~\n`");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "!\n1");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "@\n2");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "#\n3");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "$\n4");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "%\n5");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "^\n6");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "&\n7");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "*\n8");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "(\n9");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, ")\n0");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "_\n-");                 x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "+\n=");                 x += (keyWR +    60) / 2 + pad;
-			drawKey(surface, x, y,    60, keyHR, 0, "       <-\nBackspace"); x += (keyWN +    60) / 2 + pad + 1;
-			drawKey(surface, x, y, keyWN, keyHN, 0, "Num\nLock");            x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "/");                    x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "*");                    x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "-");
+			drawKey(surface, x, y, keyWR, keyHR, 1, "~\n`", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "!\n1", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "@\n2", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "#\n3", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "$\n4", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "%\n5", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "^\n6", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "&\n7", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "*\n8", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "(\n9", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, ")\n0", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "_\n-", ticks);                 x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "+\n=", ticks);                 x += (keyWR +    60) / 2 + pad;
+			drawKey(surface, x, y,    60, keyHR, 0, "       <-\nBackspace", ticks); x += (keyWN +    60) / 2 + pad + 1;
+			drawKey(surface, x, y, keyWN, keyHN, 0, "Num\nLock", ticks);            x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "/", ticks);                    x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "*", ticks);                    x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "-", ticks);
 			x = 50 + 40 / 2 / 2;
 			y += (keyHR + keyHR) / 2 + pad;
 			
-			drawKey(surface, x, y,    60, keyHR, 0, "Tab"); x += (keyWR +   60) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "Q");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "W");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "E");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "R");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "T");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "Y");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "U");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "I");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "O");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "P");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "[");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "]");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "\\");  x += (keyWR + keyWN) / 2 + pad + 1;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "7");   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "8");   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "9");   x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
-			drawKey(surface, x, y, keyWN, keyHN * 2 + pad, 1, "\n+");
+			drawKey(surface, x, y,    60, keyHR, 0, "Tab", ticks); x += (keyWR +   60) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "Q", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "W", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "E", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "R", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "T", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "Y", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "U", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "I", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "O", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "P", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "[", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "]", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "\\", ticks);  x += (keyWR + keyWN) / 2 + pad + 1;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "7", ticks);   x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "8", ticks);   x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "9", ticks);   x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
+			drawKey(surface, x, y, keyWN, keyHN * 2 + pad, 1, "\n+", ticks);
 			x = 50 + 60 / 2 / 2;
 			y -= keyHN / 2 + pad / 2 + 1;
 			y += (keyHR + keyHR) / 2 + pad;
 
-			drawKey(surface, x, y,    70, keyHR, 0, "Capslock"); x += (keyWR +    70) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "A");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "S");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "D");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "F");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "G");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "H");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "J");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "K");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "L");        x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, ":\n;");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "\"\n'");    x += (keyWR +    75) / 2 + pad + 1;
-			drawKey(surface, x, y,    75, keyHR, 0, "Enter");    x += (keyWN +    75) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "4");        x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "5");        x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "6");        x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y,    70, keyHR, 0, "Capslock", ticks); x += (keyWR +    70) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "A", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "S", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "D", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "F", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "G", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "H", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "J", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "K", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "L", ticks);        x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, ":\n;", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "\"\n'", ticks);    x += (keyWR +    75) / 2 + pad + 1;
+			drawKey(surface, x, y,    75, keyHR, 0, "Enter", ticks);    x += (keyWN +    75) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "4", ticks);        x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "5", ticks);        x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "6", ticks);        x += (keyWN + keyWN) / 2 + pad;
 			x = 50 + 110 / 2 / 2;
 			y += (keyHR + keyHR) / 2 + pad;
 
-			drawKey(surface, x, y,    95, keyHR, 0, "Shift"); x += (keyWR +    95) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "Z");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "X");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "C");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "V");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "B");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "N");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "M");     x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "<\n,");  x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, ">\n.");  x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 1, "?\n/");  x += (keyWR +    56) / 2 + pad;
-			drawKey(surface, x, y,    56, keyHR, 0, "Shift"); x += (keyWN +    56) / 2 + pad + 1;
-			drawKey(surface, x, y, keyWN, keyHN, 0, "/\\");   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "1");     x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "2");     x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "3");     x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
-			drawKey(surface, x, y, keyWN, keyHN * 2 + pad, 0, "\nEnter");
+			drawKey(surface, x, y,    95, keyHR, 0, "Shift", ticks); x += (keyWR +    95) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "Z", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "X", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "C", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "V", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "B", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "N", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "M", ticks);     x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "<\n,", ticks);  x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, ">\n.", ticks);  x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 1, "?\n/", ticks);  x += (keyWR +    56) / 2 + pad;
+			drawKey(surface, x, y,    56, keyHR, 0, "Shift", ticks); x += (keyWN +    56) / 2 + pad + 1;
+			drawKey(surface, x, y, keyWN, keyHN, 0, "/\\", ticks);   x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "1", ticks);     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "2", ticks);     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "3", ticks);     x += (keyWN + keyWN) / 2 + pad; y += keyHN / 2 + pad / 2 + 1;
+			drawKey(surface, x, y, keyWN, keyHN * 2 + pad, 0, "\nEnter", ticks);
 			x = 50 + 20 / 2 / 2;
 			y -= keyHN / 2 + pad / 2 + 1;
 			y += (keyHR + keyHR) / 2 + pad;
 
-			drawKey(surface, x, y,    50, keyHR, 0, "Ctrl");  x += (keyWR +    50) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 0, "Fn");    x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 0, "Win");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 0, "Alt");   x += (keyWR +   225) / 2 + pad + 1;
-			drawKey(surface, x, y,   225, keyHR, 0, "");      x += (keyWR +   225) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 0, "Alt");   x += (keyWR + keyWR) / 2 + pad;
-			drawKey(surface, x, y, keyWR, keyHR, 0, "Menu");  x += (keyWR +    55) / 2 + pad + 1;
-			drawKey(surface, x, y,    55, keyHR, 0, "Ctrl");  x += (keyWN +    55) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "<");     x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 0, "\\/");   x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, ">");     x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, "0");     x += (keyWN + keyWN) / 2 + pad;
-			drawKey(surface, x, y, keyWN, keyHN, 1, ".");     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y,    50, keyHR, 0, "Ctrl", ticks);  x += (keyWR +    50) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 0, "Fn", ticks);    x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 0, "Win", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 0, "Alt", ticks);   x += (keyWR +   225) / 2 + pad + 1;
+			drawKey(surface, x, y,   225, keyHR, 0, "", ticks);      x += (keyWR +   225) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 0, "Alt", ticks);   x += (keyWR + keyWR) / 2 + pad;
+			drawKey(surface, x, y, keyWR, keyHR, 0, "Menu", ticks);  x += (keyWR +    55) / 2 + pad + 1;
+			drawKey(surface, x, y,    55, keyHR, 0, "Ctrl", ticks);  x += (keyWN +    55) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "<", ticks);     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 0, "\\/", ticks);   x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, ">", ticks);     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, "0", ticks);     x += (keyWN + keyWN) / 2 + pad;
+			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
 		// Info display
 		getTextSizeF(1, &textW, &textH, "FPS       (%11u)", fps);
-		drawRect(surface, 10, 0, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 0, 1, rgb(0xFF, 0xFF, 0xFF), "FPS       (%11u)", fps);
+		drawRect(surface, 10, 10, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 10, 1, rgb(0xFF, 0xFF, 0xFF), "FPS       (%11u)", fps);
 
 		getTextSizeF(1, &textW, &textH, "Size      (%5d %5d)", width, height);
-		drawRect(surface, 10, 20, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 20, 1, rgb(0xFF, 0xFF, 0xFF), "Size      (%5d %5d)", width, height);
+		drawRect(surface, 10, 30, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 30, 1, rgb(0xFF, 0xFF, 0xFF), "Size      (%5d %5d)", width, height);
 
 		getTextSizeF(1, &textW, &textH, "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
-		drawRect(surface, 10, 40, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 40, 1, rgb(0xFF, 0xFF, 0xFF), "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
+		drawRect(surface, 10, 50, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 50, 1, rgb(0xFF, 0xFF, 0xFF), "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
 
 		getTextSizeF(1, &textW, &textH, "Mouse     (%+5d %+5d)", mouseX, mouseY);
-		drawRect(surface, 10, 60, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 60, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%+5d %+5d)", mouseX, mouseY);
+		drawRect(surface, 10, 70, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 70, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%+5d %+5d)", mouseX, mouseY);
 
 		getTextSizeF(1, &textW, &textH, "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
-		drawRect(surface, 10, 80, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 80, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
+		drawRect(surface, 10, 90, textW, textH, rgb(0x00, 0x00, 0x00));
+		drawTextF(surface, 10, 90, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
 		
 
 		SDL_UpdateWindowSurface(window);
