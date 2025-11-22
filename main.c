@@ -107,26 +107,6 @@ int main()
 
 		clearScreen(surface, rgb(0x00, 0x00, 0x3F));
 
-		Uint32 textW, textH;		
-		
-		
-		// basically drawText, but rainbow
-		//Sint32 textX = 0;
-		//Sint32 textY = 0;
-		//for (Sint32 i = ' ' + 1; i < 127; i++)
-		//{
-		//	drawChar(surface, 10 + textX, 275 + textY, 2, colors[9 - (ticks / 2 + textX / font_w / 2 + textY / font_h / 2) % 10], i);
-		//	if ((i - ' ') % 24 == 0 && (i - ' '))
-		//	{
-		//		textY += font_h * 2;
-		//		textX = 0;
-		//	}
-		//	else
-		//	{
-		//		textX += font_w * 2;
-		//	}
-		//}
-
 		{
 			Sint32 keyWR = 40;
 			Sint32 keyHR = 40;
@@ -263,6 +243,8 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, "0", ticks);     x += (keyWN + keyWN) / 2 + pad;
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
+
+		Uint32 textW, textH;
 
 		// Info display
 		getTextSizeF(1, &textW, &textH, "FPS       (%11u)", fps);

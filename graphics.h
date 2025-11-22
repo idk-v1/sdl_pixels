@@ -292,7 +292,7 @@ static void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 
 
 static void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 color)
 {
-	drawRect(surface, x - w / 2.f + w * alignX / 2.f, y - h / 2.f + h * alignY / 2.f, w, h, color);
+	drawRect(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, color);
 }
 
 static void clearScreen(SDL_Surface* surface, Uint32 color)
@@ -374,7 +374,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 
 static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 r, Uint32 color)
 {
-	drawCircle(surface, x - r + r * alignX, y - r + r * alignY, r, color);
+	drawCircle(surface, x - r * alignX, y - r * alignY, r, color);
 }
 
 #include "bulletinV1_font.h"
@@ -484,8 +484,8 @@ static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 static void drawCharA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 size, Uint32 color, char ch)
 {
 	drawChar(surface, 
-		x - (size ? size * font_w : font_w / 2) / 2.f + (size ? size * font_w : font_w / 2) / 2.f * alignX,
-		y - (size ? size * font_h : font_h / 2) / 2.f + (size ? size * font_h : font_h / 2) / 2.f * alignY, 
+		x - (size ? size * font_w : font_w / 2) / 2.f - (size ? size * font_w : font_w / 2) / 2.f * alignX,
+		y - (size ? size * font_h : font_h / 2) / 2.f - (size ? size * font_h : font_h / 2) / 2.f * alignY, 
 		size, color, ch);
 }
 
@@ -514,8 +514,8 @@ static void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 	getTextSize(text, size, &width, &height);
 
 	drawText(surface,
-		x - width / 2.f + width / 2.f * alignX,
-		y - height / 2.f + height / 2.f * alignY,
+		x - width / 2.f - width / 2.f * alignX,
+		y - height / 2.f - height / 2.f * alignY,
 		size, color, text);
 }
 
