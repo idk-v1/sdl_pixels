@@ -32,7 +32,7 @@ int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
 
-	Uint32 width = 600, height = 600;
+	Uint32 width = 1000, height = 600;
 
 	SDL_Window* window = SDL_CreateWindow("SDL Test", width, height, SDL_WINDOW_RESIZABLE);
 	SDL_Surface* surface = SDL_GetWindowSurface(window);
