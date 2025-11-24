@@ -267,8 +267,7 @@ int main()
 		drawRect(surface, 10, 90, textW, textH, rgb(0x00, 0x00, 0x00));
 		drawTextF(surface, 10, 90, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
 		
-
-		drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 200, 200, rgb(0xFF, 0x00, 0x00));
+		drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 200, 200, 5, rgb(0xFF, 0x00, 0x00));
 
 		SDL_UpdateWindowSurface(window);
 		fpsCount++;

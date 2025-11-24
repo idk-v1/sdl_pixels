@@ -318,7 +318,7 @@ static void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 	drawRect(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, color);
 }
 
-static void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 color)
+static void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 size, Uint32 color)
 {
 	const int border = 0;
 
@@ -327,71 +327,61 @@ static void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint
 	bool wCh = false;
 	bool hCh = false;
 
-	if (w < border)
+	if (size == 0)
+		return;
+	if (w < 0)
 	{
 		x += w;
 		w = -w;
 	}
-	if (h < border)
+	if (h < 0)
 	{
 		y += h;
 		h = -h;
 	}
-	if (x < border)
+	if (x + size < border)
 	{
-		w += x - border;
+		w += x + (Sint32)size - border;
 		x = border;
 		xCh = true;
 	}
-	if (y < border)
+	if (y + size < border)
 	{
-		h += y - border;
+		h += y + (Sint32)size - border;
 		y = border;
 		yCh = true;
 	}
-	if (x + w >= surface->w - border)
+	if (x + w - (Sint32)size >= surface->w - border)
 	{
-		w += (surface->w - border) - (x + w);
+		w += (surface->w - border) - (x + w - (Sint32)size);
 		wCh = true;
 	}
-	if (y + h >= surface->h - border)
+	if (y + h - (Sint32)size >= surface->h - border)
 	{
-		h += (surface->h - border) - (y + h);
+		h += (surface->h - border) - (y + h - (Sint32)size);
 		hCh = true;
 	}
 	if (x >= surface->w - border || y >= surface->h - border || x + w <= border || y + h <= border)
 		return;
 
 	if (!xCh)
-	{
-		for (Sint32 i = 0; i < h; i++)
-			setPixelUC(surface, x, i + y, color);
-	}
-	if (!yCh)
-	{
-		setLine(surface, x, y, w, color);
-	}
+		drawRect(surface, x, y, size, h, color);
 	if (!wCh)
-	{
-		for (Sint32 i = 0; i < h; i++)
-			setPixelUC(surface, x + w - 1, i + y, color);
-	}
+		drawRect(surface, x + w - size, y, size, h, color);
+	if (!yCh)
+		drawRect(surface, x, y, w, size, color);
 	if (!hCh)
-	{
-		setLine(surface, x, y + h - 1, w, color);
-	}
+		drawRect(surface, x, y + h - size, w, size, color);
 }
 
-static void drawRectOutA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 color)
+static void drawRectOutA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 size, Uint32 color)
 {
-	drawRectOut(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, color);
+	drawRectOut(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, size, color);
 }
 
 
-static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color)
+static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint32 color)
 {
-	if (r < 0)
-		r = -r;
 	if (r == 0)
 		return;
 
@@ -457,7 +447,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint3
 	}
 }
 
-static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 r, Uint32 color)
+static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 r, Uint32 color)
 {
 	drawCircle(surface, x - r * alignX, y - r * alignY, r, color);
 }
