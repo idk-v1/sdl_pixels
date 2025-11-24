@@ -6,6 +6,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#ifdef __GNUC__
+#define DECLARE_ALIGNED(t, v, a) t __attribute__((aligned(a))) v
+#elif defined(_MSC_VER)
+#define DECLARE_ALIGNED(t, v, a) __declspec(align(a)) t v
+#else
+#define DECLARE_ALIGNED(t, v, a) t v
+#endif
+
 static const SDL_PixelFormatDetails* pixFmt = NULL;
 
 inline static Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
@@ -32,6 +40,8 @@ inline static void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 col
 }
 
 #ifdef USE_SSE
+#include <immintrin.h>
+
 #if defined(_MSC_VER) && !defined(__clang__)
 #define SSE_BEGIN \
     __m128 c128; \
@@ -49,6 +59,8 @@ inline static void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 col
     cccc[3] = color; \
     c128 = *(__m128 *)cccc;
 #endif
+#else
+#define SSE_BEGIN
 #endif
 
 #ifdef USE_SSE
@@ -185,7 +197,9 @@ inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 co
 static inline void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
+#ifdef USE_SSE
 	SSE_BEGIN;
+#endif
 
 	Sint32 align = (4 - ((x + y * surface->w) & 0b11)) & 0b11;
 	for (Sint32 i = 0; i < align && i < w; i++)
