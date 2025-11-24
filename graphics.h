@@ -271,6 +271,15 @@ static void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h
 	}
 }
 
+static void clearScreen(SDL_Surface* surface, Uint32 color)
+{
+	Sint32 w = surface->w;
+	Sint32 h = surface->h;
+
+	setLine(surface, 0, 0, w * h, color);
+}
+
+
 static void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 color)
 {
 	const Sint32 border = 0;
@@ -309,13 +318,75 @@ static void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 	drawRect(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, color);
 }
 
-static void clearScreen(SDL_Surface* surface, Uint32 color)
+static void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 color)
 {
-	Sint32 w = surface->w;
-	Sint32 h = surface->h;
+	const int border = 0;
 
-	setLine(surface, 0, 0, w * h, color);
+	bool xCh = false;
+	bool yCh = false;
+	bool wCh = false;
+	bool hCh = false;
+
+	if (w < border)
+	{
+		x += w;
+		w = -w;
+	}
+	if (h < border)
+	{
+		y += h;
+		h = -h;
+	}
+	if (x < border)
+	{
+		w += x - border;
+		x = border;
+		xCh = true;
+	}
+	if (y < border)
+	{
+		h += y - border;
+		y = border;
+		yCh = true;
+	}
+	if (x + w >= surface->w - border)
+	{
+		w += (surface->w - border) - (x + w);
+		wCh = true;
+	}
+	if (y + h >= surface->h - border)
+	{
+		h += (surface->h - border) - (y + h);
+		hCh = true;
+	}
+	if (x >= surface->w - border || y >= surface->h - border || x + w <= border || y + h <= border)
+		return;
+
+	if (!xCh)
+	{
+		for (Sint32 i = 0; i < h; i++)
+			setPixelUC(surface, x, i + y, color);
+	}
+	if (!yCh)
+	{
+		setLine(surface, x, y, w, color);
+	}
+	if (!wCh)
+	{
+		for (Sint32 i = 0; i < h; i++)
+			setPixelUC(surface, x + w - 1, i + y, color);
+	}
+	if (!hCh)
+	{
+		setLine(surface, x, y + h - 1, w, color);
+	}
 }
+
+static void drawRectOutA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 color)
+{
+	drawRectOut(surface, x - w / 2.f - w * alignX / 2.f, y - h / 2.f - h * alignY / 2.f, w, h, color);
+}
+
 
 static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 r, Uint32 color)
 {
@@ -391,6 +462,7 @@ static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, 
 	drawCircle(surface, x - r * alignX, y - r * alignY, r, color);
 }
 
+
 #include "bulletinV1_font.h"
 
 static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* height)
@@ -436,12 +508,42 @@ static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* he
 	}
 }
 
+static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char* fmt, ...)
+{
+	va_list prf0, prf1;
+	va_start(prf0, fmt);
+
+	va_copy(prf1, prf0);
+	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
+	va_end(prf0);
+
+	if (len <= 100)
+	{
+		char* smBuf[100];
+		vsnprintf(smBuf, 100, fmt, prf1);
+		getTextSize(smBuf, size, width, height);
+	}
+	else
+	{
+		char* buf = malloc(len);
+		if (buf)
+		{
+			vsnprintf(buf, len, fmt, prf1);
+			getTextSize(buf, size, width, height);
+			free(buf);
+		}
+	}
+
+	va_end(prf1);
+}
+
 static inline bool getArrayBit(Uint32 array[], Uint32 i)
 {
 	Uint32 index = i >> 5;
 	Uint32 shift = 31 - (i & 0b11111);
 	return (array[index] >> shift) & 1;
 }
+
 
 static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, char ch)
 {
@@ -584,35 +686,6 @@ static void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, f
 		{
 			vsnprintf(buf, len, fmt, prf1);
 			drawTextA(surface, x, y, alignX, alignY, size, color, buf);
-			free(buf);
-		}
-	}
-
-	va_end(prf1);
-}
-
-static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char* fmt, ...)
-{
-	va_list prf0, prf1;
-	va_start(prf0, fmt);
-
-	va_copy(prf1, prf0);
-	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
-	va_end(prf0);
-
-	if (len <= 100)
-	{
-		char* smBuf[100];
-		vsnprintf(smBuf, 100, fmt, prf1);
-		getTextSize(smBuf, size, width, height);
-	}
-	else
-	{
-		char* buf = malloc(len);
-		if (buf)
-		{
-			vsnprintf(buf, len, fmt, prf1);
-			getTextSize(buf, size, width, height);
 			free(buf);
 		}
 	}
