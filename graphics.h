@@ -509,7 +509,7 @@ static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char*
 
 	if (len <= 100)
 	{
-		char* smBuf[100];
+		char smBuf[100];
 		vsnprintf(smBuf, 100, fmt, prf1);
 		getTextSize(smBuf, size, width, height);
 	}
@@ -636,7 +636,7 @@ static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uin
 
 	if (len <= 100)
 	{
-		char* smBuf[100];
+		char smBuf[100];
 		vsnprintf(smBuf, 100, fmt, prf1);
 		drawText(surface, x, y, size, color, smBuf);
 	}
@@ -665,7 +665,7 @@ static void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, f
 
 	if (len <= 100)
 	{
-		char* smBuf[100];
+		char smBuf[100];
 		vsnprintf(smBuf, 100, fmt, prf1);
 		drawTextA(surface, x, y, alignX, alignY, size, color, smBuf);
 	}
