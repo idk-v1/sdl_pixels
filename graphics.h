@@ -515,7 +515,7 @@ static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char*
 	}
 	else
 	{
-		char* buf = malloc(len);
+		char* buf = (char*)malloc(len);
 		if (buf)
 		{
 			vsnprintf(buf, len, fmt, prf1);
@@ -527,7 +527,7 @@ static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char*
 	va_end(prf1);
 }
 
-static inline bool getArrayBit(Uint32 array[], Uint32 i)
+static inline bool getArrayBit(const Uint32 array[], Uint32 i)
 {
 	Uint32 index = i >> 5;
 	Uint32 shift = 31 - (i & 0b11111);
@@ -642,7 +642,7 @@ static void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uin
 	}
 	else
 	{
-		char* buf = malloc(len);
+		char* buf = (char*)malloc(len);
 		if (buf)
 		{
 			vsnprintf(buf, len, fmt, prf1);
@@ -671,7 +671,7 @@ static void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, f
 	}
 	else
 	{
-		char* buf = malloc(len);
+		char* buf = (char*)malloc(len);
 		if (buf)
 		{
 			vsnprintf(buf, len, fmt, prf1);
