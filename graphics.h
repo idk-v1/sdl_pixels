@@ -320,58 +320,10 @@ static void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 
 static void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, Uint32 size, Uint32 color)
 {
-	const int border = 0;
-
-	bool xCh = false;
-	bool yCh = false;
-	bool wCh = false;
-	bool hCh = false;
-
-	if (size == 0)
-		return;
-	if (w < 0)
-	{
-		x += w;
-		w = -w;
-	}
-	if (h < 0)
-	{
-		y += h;
-		h = -h;
-	}
-	if (x + size < border)
-	{
-		w += x + (Sint32)size - border;
-		x = border;
-		xCh = true;
-	}
-	if (y + size < border)
-	{
-		h += y + (Sint32)size - border;
-		y = border;
-		yCh = true;
-	}
-	if (x + w - (Sint32)size >= surface->w - border)
-	{
-		w += (surface->w - border) - (x + w - (Sint32)size);
-		wCh = true;
-	}
-	if (y + h - (Sint32)size >= surface->h - border)
-	{
-		h += (surface->h - border) - (y + h - (Sint32)size);
-		hCh = true;
-	}
-	if (x >= surface->w - border || y >= surface->h - border || x + w <= border || y + h <= border)
-		return;
-
-	if (!xCh)
-		drawRect(surface, x, y, size, h, color);
-	if (!wCh)
-		drawRect(surface, x + w - size, y, size, h, color);
-	if (!yCh)
-		drawRect(surface, x, y, w, size, color);
-	if (!hCh)
-		drawRect(surface, x, y + h - size, w, size, color);
+	drawRect(surface, x, y, w, size, color);
+	drawRect(surface, x, y, size, h, color);
+	drawRect(surface, x, y + h - size, w, size, color);
+	drawRect(surface, x + w - size, y, size, h, color);
 }
 
 static void drawRectOutA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 w, Sint32 h, Uint32 size, Uint32 color)
