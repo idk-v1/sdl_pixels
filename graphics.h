@@ -388,7 +388,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 	Sint32 xx = x - r;
 	Sint32 yy = y - r;
 	Sint32 w = r * 2;
-	Sint32 h = r * 2;
+	Sint32 h = w;
 	const Sint32 border = 0;
 	if (xx < border)
 	{
@@ -413,17 +413,16 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 	{
 		Sint32 yp = yy + iy;
 		Sint32 ypow = y - yp;
+		ypow *= ypow;
 
 		// Find end points of circle outline, then rectangle fill
 		Sint32 ixl = 0;
 		for (; ixl < w; ixl++)
 		{
-			Sint32 xp = xx + ixl;
-			Sint32 xpow = x - xp;
-			if (xpow * xpow + ypow * ypow <= r)
-			{
+			Sint32 xpow = x - (xx +ixl);
+			xpow *= xpow;
+			if (xpow + ypow <= r)
 				break;
-			}
 		}
 		if (ixl == w)
 			continue;
@@ -431,17 +430,15 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 		Sint32 ixr = w - 1;
 		for (; ixr >= 0; ixr--)
 		{
-			Sint32 xp = xx + ixr;
-			Sint32 xpow = x - xp;
-			if (xpow * xpow + ypow * ypow <= r)
-			{
+			Sint32 xpow = x - (xx + ixr);
+			xpow *= xpow;
+			if (xpow + ypow <= r)
 				break;
-			}
 		}
 		if (ixr == -1)
 			continue;
 
-		Sint32 width = ixr - 1 - ixl;
+		Sint32 width = ixr + 1 - ixl;
 		if (width > 0)
 			setLine(surface, xx + ixl, yp, width, color);
 	}

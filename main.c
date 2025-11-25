@@ -244,6 +244,8 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
+		drawCircle(surface, mouseXR, mouseYR, 10, rgb(0xFF, 0x00, 0x00));
+
 		Uint32 textW, textH;
 
 		// Info display
