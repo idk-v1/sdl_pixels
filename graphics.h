@@ -339,7 +339,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 
 	Sint32 xx = x - r;
 	Sint32 yy = y - r;
-	Sint32 w = r * 2;
+	Sint32 w = r * 2 + 1;
 	Sint32 h = w;
 	const Sint32 border = 0;
 	if (xx < border)
@@ -371,9 +371,19 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 		Sint32 ixl = 0;
 		for (; ixl < w; ixl++)
 		{
-			Sint32 xpow = x - (xx +ixl);
+			Sint32 xpow = x - (xx + ixl);
 			xpow *= xpow;
-			if (xpow + ypow <= r)
+			Sint32 dist = xpow + ypow;
+
+			// Attempt at rounding after sqrt approx
+			// Only needed at small sizes anyways
+			if (dist & 0b11 < 0b10)
+				dist |= 0b11;
+			else
+				dist &= ~0b11;
+			if (dist <= r)
+			//if (xpow + ypow <= r)
+			//if (round(sqrtf(xpow + ypow)) <= r)
 				break;
 		}
 		if (ixl == w)
@@ -384,13 +394,21 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 		{
 			Sint32 xpow = x - (xx + ixr);
 			xpow *= xpow;
-			if (xpow + ypow <= r)
+			Sint32 dist = xpow + ypow;
+			if (dist & 0b11 < 0b10)
+				dist |= 0b11;
+			else
+				dist &= ~0b11;
+			if (dist <= r)
+			//if (xpow + ypow <= r)
+			//if (round(sqrtf(xpow + ypow)) <= r)
 				break;
 		}
 		if (ixr == -1)
 			continue;
 
 		Sint32 width = ixr + 1 - ixl;
+		//printf("w:%3d l:%3d r:%3d\n", width, ixl, ixr);
 		if (width > 0)
 			setLine(surface, xx + ixl, yp, width, color);
 	}

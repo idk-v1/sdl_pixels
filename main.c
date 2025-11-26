@@ -244,8 +244,11 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
-		drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 100, 100, 5, rgb(0xFF, 0x00, 0x00));
-		//drawCircle(surface, mouseXR, mouseYR, 10, rgb(0xFF, 0x00, 0x00));
+		//drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 100, 100, 5, rgb(0xFF, 0x00, 0x00));
+		for (int i = 0; i < 10; i++)
+			for (int ii = 0; ii < 10; ii++)
+				drawCircle(surface, 100 + i * 50, 300 + ii * 50, i + ii * 10, rgb(0xFF, 0x00, 0x00));
+		//drawCircle(surface, 500, 300, 10, rgb(0xFF, 0x00, 0x00));
 
 		Uint32 textW, textH;
 
