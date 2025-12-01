@@ -41,7 +41,8 @@ void TextBG(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, char c
 		if (ch >= '0' && ch <= '9' || ch == '-' || ch == '+')
 			drawRect(surface, x, y, w, h, rgb(0x00, 0x00, 0x00));
 		else
-			drawRect(surface, x, y, w, h, colors[(*rainbow)++ % 10]);
+			drawRect(surface, x, y, w, h, colors[*rainbow % 10]);
+		(*rainbow)++;
 	}
 }
 

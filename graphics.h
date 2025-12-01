@@ -377,6 +377,7 @@ static void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint3
 
 			// Attempt at rounding after sqrt approx
 			// Only needed at small sizes anyways
+			// I have no idea how this actually helps
 			dist &= ~0b11;
 			if (dist <= r)
 			//if (xpow + ypow <= r)
