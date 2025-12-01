@@ -649,3 +649,97 @@ static void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, f
 
 	va_end(prf1);
 }
+
+
+static void drawTextFn(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, 
+	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*), void* data, const char* text)
+{
+	Sint32 xx = 0;
+	Sint32 yy = 0;
+	for (Sint32 i = 0; text[i]; i++)
+	{
+		if (before)	before(surface, x + xx, y + yy, size * font_w, size * font_h, text[i], data);
+		if (text[i] == '\n')
+		{
+			xx = 0;
+			yy += (size ? size * font_h : font_h / 2);
+		}
+		else if (text[i] < 127 && text[i] >= ' ')
+		{
+			drawChar(surface, x + xx, y + yy, size, color, text[i]);
+			xx += (size ? size * font_w : font_w / 2);
+		}
+	}
+}
+
+static void drawTextAFn(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Uint32 size, Uint32 color, 
+	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*), void* data, const char* text)
+{
+	Uint32 width, height;
+	getTextSize(text, size, &width, &height);
+
+	drawTextFn(surface,
+		x - width / 2.f - width / 2.f * alignX,
+		y - height / 2.f - height / 2.f * alignY,
+		size, color, before, data, text);
+}
+
+static void drawTextFFn(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color, 
+	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*), void* data, const char* fmt, ...)
+{
+	va_list prf0, prf1;
+	va_start(prf0, fmt);
+
+	va_copy(prf1, prf0);
+	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
+	va_end(prf0);
+
+	if (len <= 100)
+	{
+		char smBuf[100];
+		vsnprintf(smBuf, 100, fmt, prf1);
+		drawTextFn(surface, x, y, size, color, before, data, smBuf);
+	}
+	else
+	{
+		char* buf = (char*)malloc(len);
+		if (buf)
+		{
+			vsnprintf(buf, len, fmt, prf1);
+			drawTextFn(surface, x, y, size, color, before, data, buf);
+			free(buf);
+		}
+	}
+
+	va_end(prf1);
+}
+
+static void drawTextFAFn(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, float alignY, Sint32 size, Uint32 color, 
+	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*), void* data, const char* fmt, ...)
+{
+	va_list prf0, prf1;
+	va_start(prf0, fmt);
+
+	va_copy(prf1, prf0);
+	Sint32 len = vsnprintf(NULL, 0, fmt, prf0);
+	va_end(prf0);
+
+	if (len <= 100)
+	{
+		char smBuf[100];
+		vsnprintf(smBuf, 100, fmt, prf1);
+		drawTextAFn(surface, x, y, alignX, alignY, size, color, before, data, smBuf);
+	}
+	else
+	{
+		char* buf = (char*)malloc(len);
+		if (buf)
+		{
+			vsnprintf(buf, len, fmt, prf1);
+			drawTextAFn(surface, x, y, alignX, alignY, size, color, before, data, buf);
+			free(buf);
+		}
+	}
+
+	va_end(prf1);
+}

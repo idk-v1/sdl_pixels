@@ -32,6 +32,19 @@ void drawKey(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 w, Uint32 h, Uint3
 	drawTextA(surface, x, y, 0, 0, fontSize, colors[(ticks / 2 + x / 50 + y / 50) % 10], key);
 }
 
+// Really ugly, but just showing off
+void TextBG(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, char ch, void* data)
+{
+	Uint32* rainbow = (Uint32*)data;
+	if (ch != '\n')
+	{
+		if (ch >= '0' && ch <= '9' || ch == '-' || ch == '+')
+			drawRect(surface, x, y, w, h, rgb(0x00, 0x00, 0x00));
+		else
+			drawRect(surface, x, y, w, h, colors[(*rainbow)++ % 10]);
+	}
+}
+
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -248,30 +261,21 @@ int main()
 		for (int i = 0; i < 10; i++)
 			for (int ii = 0; ii < 10; ii++)
 				drawCircle(surface, 100 + i * 50, 300 + ii * 50, i + ii * 10, rgb(0xFF, 0x00, 0x00));
-		//drawCircle(surface, 500, 300, 10, rgb(0xFF, 0x00, 0x00));
 
 		Uint32 textW, textH;
 
+		Uint32 rainbow = ticks / 2;
+
 		// Info display
-		getTextSizeF(1, &textW, &textH, "FPS       (%11u)", fps);
-		drawRect(surface, 10, 10, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 10, 1, rgb(0xFF, 0xFF, 0xFF), "FPS       (%11u)", fps);
+		drawTextFFn(surface, 10, 10, 1, rgb(0xFF, 0xFF, 0xFF), TextBG, &rainbow, "FPS       (%11u)", fps);
 
-		getTextSizeF(1, &textW, &textH, "Size      (%5d %5d)", width, height);
-		drawRect(surface, 10, 30, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 30, 1, rgb(0xFF, 0xFF, 0xFF), "Size      (%5d %5d)", width, height);
+		drawTextFFn(surface, 10, 30, 1, rgb(0xFF, 0xFF, 0xFF), TextBG, &rainbow, "Size      (%5d %5d)", width, height);
 
-		getTextSizeF(1, &textW, &textH, "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
-		drawRect(surface, 10, 50, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 50, 1, rgb(0xFF, 0xFF, 0xFF), "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
+		drawTextFFn(surface, 10, 50, 1, rgb(0xFF, 0xFF, 0xFF), TextBG, &rainbow, "Position  (%+5d %+5d)", mouseX - mouseXR, mouseY - mouseYR);
 
-		getTextSizeF(1, &textW, &textH, "Mouse     (%+5d %+5d)", mouseX, mouseY);
-		drawRect(surface, 10, 70, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 70, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse     (%+5d %+5d)", mouseX, mouseY);
+		drawTextFFn(surface, 10, 70, 1, rgb(0xFF, 0xFF, 0xFF), TextBG, &rainbow, "Mouse     (%+5d %+5d)", mouseX, mouseY);
 
-		getTextSizeF(1, &textW, &textH, "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
-		drawRect(surface, 10, 90, textW, textH, rgb(0x00, 0x00, 0x00));
-		drawTextF(surface, 10, 90, 1, rgb(0xFF, 0xFF, 0xFF), "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
+		drawTextFFn(surface, 10, 90, 1, rgb(0xFF, 0xFF, 0xFF), TextBG, &rainbow, "Mouse Rel (%+5d %+5d)", mouseXR, mouseYR);
 		
 		SDL_UpdateWindowSurface(window);
 		fpsCount++;
