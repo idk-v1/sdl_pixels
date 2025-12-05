@@ -417,6 +417,9 @@ static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, 
 
 #include "bulletinV1_font.h"
 
+static int textSpacing = 1;
+static int lineSpacing = 1;
+
 static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* height)
 {
 	*width = 0;
@@ -425,10 +428,10 @@ static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* he
 	if (!text)
 		return;
 
-	*height = 1;
+	*height = (size ? size * font_h : font_h / 2);
 
 	Uint32 x = 0;
-	Uint32 y = 1;
+	Uint32 y = (size ? size * font_h : font_h / 2);
 
 	for (Uint32 i = 0; text[i]; i++)
 	{
@@ -436,28 +439,17 @@ static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* he
 		{
 			if (x > *width)
 				*width = x;
-			y += 1;
+			y += (size ? size * font_h : font_h / 2) + lineSpacing;
 			x = 0;
 		}
 		else
 		{
-			x += 1;
+			x += (size ? size * font_w : font_w / 2) + textSpacing;
 			*height = y;
 		}
 	}
 	if (x > *width)
 		*width = x;
-
-	if (size)
-	{
-		*width *= size * font_w;
-		*height *= size * font_h;
-	}
-	else
-	{
-		*width *= font_w / 2;
-		*height *= font_h / 2;
-	}
 }
 
 static void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char* fmt, ...)
@@ -496,14 +488,13 @@ static inline bool getArrayBit(const Uint32 array[], Uint32 i)
 	return (array[index] >> shift) & 1;
 }
 
-
 static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, char ch)
 {
 	const int border = 0;
 
 	if (size)
 	{
-		Sint32 index = (ch - ' ') * (stride / 32);
+		Sint32 index = (ch - ' ') * stride;
 		if (x >= border && y >= border &&
 			x + size * font_w < surface->w - border &&
 			y + size * font_h < surface->h - border)
@@ -528,7 +519,7 @@ static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 	}
 	else // Hacky way of reducing text size, samples top left of 2x2 pixel section
 	{
-		Sint32 index = (ch - ' ') * (stride / 32);
+		Sint32 index = (ch - ' ') * stride;
 		if (x >= border && y >= border &&
 			x + font_w / 2 < surface->w - border &&
 			y + font_h / 2 < surface->h - border)
@@ -566,12 +557,12 @@ static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 		if (text[i] == '\n')
 		{
 			xx = 0;
-			yy += (size ? size * font_h : font_h / 2);
+			yy += (size ? size * font_h : font_h / 2) + lineSpacing;
 		}
 		else if (text[i] < 127 && text[i] >= ' ')
 		{
 			drawChar(surface, x + xx, y + yy, size, color, text[i]);
-			xx += (size ? size * font_w : font_w / 2);
+			xx += (size ? size * font_w : font_w / 2) + textSpacing;
 		}
 	}
 }
