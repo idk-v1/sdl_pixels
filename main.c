@@ -62,7 +62,7 @@ void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
 	if (!colorRange(pix, (RGB){254, 222, 41}, 64))
 	{
 		Uint64 ticks = *((Uint64*)data);
-		int ox = cosf((ticks + ty) * 10 * 3.1415f / 180.f) * 5;
+		int ox = cosf((ticks + height - 1 - ty) * 10 * 3.1415f / 180.f) * 5;
 		if (px + ox >= 0 && px + ox < surface->w)
 		{
 			if (pix.b + 100 >= 256)
