@@ -15,11 +15,16 @@
 
 #ifdef __cplusplus
 extern "C" { extern const SDL_PixelFormatDetails* pixFmt; }
+struct RGB { Uint8 r, g, b, x; };
 #else
 extern const SDL_PixelFormatDetails* pixFmt;
+typedef struct RGB { Uint8 r, g, b, x; } RGB;
 #endif
 
 PIXEL_FN inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b);
+
+// unknown format -> RRGGBBXX
+PIXEL_FN RGB unrgb(Uint32 color);
 
 
 PIXEL_FN inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color);

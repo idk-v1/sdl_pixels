@@ -46,19 +46,31 @@ void TextBG(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, char c
 	}
 }
 
+bool colorRange(RGB rgb0, RGB rgb1, int dist)
+{
+	int r = rgb0.r - rgb1.r; if (r < 0) r = -r;
+	int g = rgb0.g - rgb1.g; if (g < 0) g = -g;
+	int b = rgb0.b - rgb1.b; if (b < 0) b = -b;
+
+	return (r <= dist && g <= dist && b <= dist);
+}
+
 void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
 	Sint32 width, Sint32 height, Uint32 color, void* data)
 {
-	if (0 && color == rgb(254, 222, 41))
-	{
-
-	}
-	else
+	RGB pix = unrgb(color);
+	if (!colorRange(pix, (RGB){254, 222, 41}, 64))
 	{
 		Uint64 ticks = *((Uint64*)data);
 		int ox = cosf((ticks + ty) * 10 * 3.1415f / 180.f) * 5;
 		if (px + ox >= 0 && px + ox < surface->w)
-			setPixel(surface, px + ox, py, color);
+		{
+			if (pix.b + 100 >= 256)
+				pix.b = 255;
+			else
+				pix.b += 100;
+			setPixel(surface, px + ox, py, rgb(pix.r, pix.g, pix.b));
+		}
 	}
 }
 

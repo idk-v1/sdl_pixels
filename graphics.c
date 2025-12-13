@@ -23,6 +23,13 @@ inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
 	return SDL_MapRGB(pixFmt, NULL, r, g, b);
 }
 
+RGB unrgb(Uint32 color)
+{
+	RGB rgb = { 0 };
+	SDL_GetRGB(color, pixFmt, NULL, &rgb.r, &rgb.g, &rgb.b);
+	return rgb;
+}
+
 inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	((Uint32*)surface->pixels)[x + y * surface->w] = color;
