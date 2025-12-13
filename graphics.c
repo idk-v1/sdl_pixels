@@ -1,5 +1,3 @@
-#pragma once
-
 #include <SDL3/SDL.h>
 #include <stdio.h>
 #include <string.h>
@@ -17,37 +15,6 @@
 #endif
 
 const SDL_PixelFormatDetails* pixFmt = NULL;
-
-inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
-{
-	return SDL_MapRGB(pixFmt, NULL, r, g, b);
-}
-
-RGB unrgb(Uint32 color)
-{
-	RGB rgb = { 0 };
-	SDL_GetRGB(color, pixFmt, NULL, &rgb.r, &rgb.g, &rgb.b);
-	return rgb;
-}
-
-inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
-{
-	((Uint32*)surface->pixels)[x + y * surface->w] = color;
-}
-
-inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
-{
-	*((Uint64*)&((Uint32*)surface->pixels)[x + y * surface->w]) = color;
-}
-
-inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
-{
-	if (x < (Uint32)surface->w && y < (Uint32)surface->h)
-		setPixelUC(surface, x, y, color);
-	else
-		printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
-}
-
 
 void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)
 {
@@ -520,7 +487,7 @@ Bitmap loadImage(const char* filename)
 	Bitmap bmp = { 0 };
 
 	int width = 0, height = 0, trash = 4;
-	bmp.pixels = stbi_load(filename, &width, &height, &trash, 4);
+	bmp.pixels = (Uint32*)stbi_load(filename, &width, &height, &trash, 4);
 	if (bmp.pixels)
 	{
 		bmp.width = width;

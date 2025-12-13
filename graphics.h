@@ -21,17 +21,37 @@ extern const SDL_PixelFormatDetails* pixFmt;
 typedef struct RGB { Uint8 r, g, b, x; } RGB;
 #endif
 
-PIXEL_FN inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b);
+static inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
+{
+	return SDL_MapRGB(pixFmt, NULL, r, g, b);
+}
 
 // unknown format -> RRGGBBXX
-PIXEL_FN RGB unrgb(Uint32 color);
+static inline RGB unrgb(Uint32 color)
+{
+	RGB rgb = { 0 };
+	SDL_GetRGB(color, pixFmt, NULL, &rgb.r, &rgb.g, &rgb.b);
+	return rgb;
+}
 
 
-PIXEL_FN inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color);
+inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
+{
+	((Uint32*)surface->pixels)[x + y * surface->w] = color;
+}
 
-PIXEL_FN inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color);
+inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+{
+	*((Uint64*)&((Uint32*)surface->pixels)[x + y * surface->w]) = color;
+}
 
-PIXEL_FN inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color);
+inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
+{
+	if (x < (Uint32)surface->w && y < (Uint32)surface->h)
+		setPixelUC(surface, x, y, color);
+	//else
+		//printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
+}
 
 
 #ifdef USE_SSE
@@ -59,7 +79,7 @@ PIXEL_FN inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 c
 #endif
 
 #ifdef USE_SSE
-PIXEL_FN inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
+inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
 	// extreme alignment needed to not crash (16 bytes)
 	// https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#text=_mm_stream_ps&ig_expand=6562
@@ -83,7 +103,7 @@ PIXEL_FN inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y,
 	_mm_stream_ps((float*)(pixels + 60), color);
 }
 
-PIXEL_FN inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
+inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
 	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
 	_mm_stream_ps((float*)(pixels + 0), color);
@@ -96,7 +116,7 @@ PIXEL_FN inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y,
 	_mm_stream_ps((float*)(pixels + 28), color);
 }
 
-PIXEL_FN inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
+inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
 	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
 	_mm_stream_ps((float*)(pixels + 0), color);
@@ -105,14 +125,14 @@ PIXEL_FN inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y,
 	_mm_stream_ps((float*)(pixels + 12), color);
 }
 
-PIXEL_FN inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
+inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
 	Uint32* pixels = &(((Uint32*)surface->pixels)[x + y * surface->w]);
 	_mm_stream_ps((float*)(pixels + 0), color);
 	_mm_stream_ps((float*)(pixels + 4), color);
 }
 #else
-PIXEL_FN inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -148,7 +168,7 @@ PIXEL_FN inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y,
 	setPixel2UC(surface, x + 62, y, color);
 }
 
-PIXEL_FN inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -168,7 +188,7 @@ PIXEL_FN inline static void setHLine32(SDL_Surface* surface, Uint32 x, Uint32 y,
 	setPixel2UC(surface, x + 30, y, color);
 }
 
-PIXEL_FN inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -180,7 +200,7 @@ PIXEL_FN inline static void setHLine16(SDL_Surface* surface, Uint32 x, Uint32 y,
 	setPixel2UC(surface, x + 14, y, color);
 }
 
-PIXEL_FN inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
+inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	setPixel2UC(surface, x + 0, y, color);
 	setPixel2UC(surface, x + 2, y, color);
@@ -189,7 +209,7 @@ PIXEL_FN inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, 
 }
 #endif
 
-PIXEL_FN inline static void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 color)
+inline static void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
 #ifdef USE_SSE
@@ -265,7 +285,7 @@ PIXEL_FN void setRect(SDL_Surface* surface, Uint32 x, Uint32 y,
 PIXEL_FN void clearScreen(SDL_Surface* surface, Uint32 color);
 
 
-PIXEL_FN PIXEL_FN void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y,
+PIXEL_FN void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y,
 	Sint32 w, Sint32 h, Uint32 color);
 
 PIXEL_FN void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y,

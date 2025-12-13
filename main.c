@@ -1,7 +1,7 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
-#define USE_SSE
+//#define USE_SSE
 #include "graphics.h"
 
 void getMousePos(Sint32* mouseX, Sint32* mouseY)
