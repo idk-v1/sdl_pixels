@@ -46,6 +46,22 @@ void TextBG(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 w, Sint32 h, char c
 	}
 }
 
+void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
+	Sint32 width, Sint32 height, Uint32 color, void* data)
+{
+	if (0 && color == rgb(254, 222, 41))
+	{
+
+	}
+	else
+	{
+		Uint64 ticks = *((Uint64*)data);
+		int ox = cosf((ticks + ty) * 10 * 3.1415f / 180.f) * 5;
+		if (px + ox >= 0 && px + ox < surface->w)
+			setPixel(surface, px + ox, py, color);
+	}
+}
+
 int main()
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -80,6 +96,7 @@ int main()
 	colors[9] = rgb(0xFF, 0x00, 0x7F);
 
 	Bitmap image = loadImage("test.png");
+	Bitmap amongUs = loadImage("amongUs.jpg");
 
 	bool running = true; 
 	while (running)
@@ -260,6 +277,25 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
+		if (mouseXR > (Sint32)width / 2) // right
+		{
+			if (mouseYR > (Sint32)height / 2) // bottom
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+					-(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+			else // top
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+					-(Sint32)amongUs.width, amongUs.height, 0, 0, pixelFn, &ticks);
+		}
+		else // left
+		{
+			if (mouseYR > (Sint32)height / 2) // bottom
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+					(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+			else // top
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+					(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		}
+
 		drawImageA(surface, &image, mouseXR, mouseYR, 
 			image.height * (ticks / 10 % (image.width / image.height)), 0, 
 			image.height, image.height, 0, 0);
@@ -289,6 +325,7 @@ int main()
 	}
 
 	freeImage(&image);
+	freeImage(&amongUs);
 
 	SDL_DestroyWindow(window);
 	SDL_Quit();

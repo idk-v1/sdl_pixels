@@ -537,6 +537,21 @@ void freeImage(Bitmap* image)
 void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height)
 {
+	bool revW = false;
+	if (width < 0)
+	{
+		revW = true;
+		destX += width;
+		width = -width;
+	}
+	bool revH = false;
+	if (height < 0)
+	{
+		revH = true;
+		destY += height;
+		height = -height;
+	}
+
 	if (width > surface->w)
 		width = surface->w;
 	if (height > surface->h)
@@ -563,17 +578,53 @@ void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	if (destY + height >= surface->h)
 		height += surface->h - (destY + height);
 
-	// maybe reverse image in future
 	if (width <= 0 || height <= 0)
 		return;
 
-	for (Uint32 y = 0; y < height; y++)
+	if (!revW)
 	{
-		for (Uint32 x = 0; x < width; x++)
+		if (!revH) // normal
 		{
-			Uint32 pixel = image->pixels[(x + srcX) + (y + srcY) * image->width];
-			Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
-			setPixelUC(surface, x + destX, y + destY, color);
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(x + srcX) + (y + srcY) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					setPixelUC(surface, x + destX, y + destY, color);
+				}
+		}
+		else
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(x + srcX) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					setPixelUC(surface, x + destX, y + destY, color);
+				}
+		}
+	}
+	else
+	{
+		if (!revH)
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (y + srcY) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					setPixelUC(surface, x + destX, y + destY, color);
+				}
+		}
+		else
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					setPixelUC(surface, x + destX, y + destY, color);
+				}
 		}
 	}
 }
@@ -583,4 +634,114 @@ void drawImageA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 {
 	drawImage(surface, image, destX - width / 2 - width / 2.f * alignX,
 		destY - height / 2 - height / 2.f * alignY, srcX, srcY, width, height);
+}
+
+void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
+	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height,
+	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
+		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, Uint32 color, void* data), void* data)
+{
+	bool revW = false;
+	if (width < 0)
+	{
+		revW = true;
+		destX += width;
+		width = -width;
+	}
+	bool revH = false;
+	if (height < 0)
+	{
+		revH = true;
+		destY += height;
+		height = -height;
+	}
+
+	if (width > surface->w)
+		width = surface->w;
+	if (height > surface->h)
+		height = surface->h;
+
+	if (destX < 0)
+	{
+		srcX -= destX;
+		width += destX;
+		destX = 0;
+	}
+	if (destY < 0)
+	{
+		srcY -= destY;
+		height += destY;
+		destY = 0;
+	}
+
+	if (destX >= surface->w || destY >= surface->h)
+		return;
+
+	if (destX + width >= surface->w)
+		width += surface->w - (destX + width);
+	if (destY + height >= surface->h)
+		height += surface->h - (destY + height);
+
+	if (width <= 0 || height <= 0)
+		return;
+
+	if (!revW)
+	{
+		if (!revH) // normal
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(x + srcX) + (y + srcY) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					pixelFn(surface, x + destX, y + destY, x + srcX, y + srcY, 
+						image->width, image->height, color, data);
+				}
+		}
+		else
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(x + srcX) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					pixelFn(surface, x + destX, y + destY, x + srcX, image->height - 1 - (y + srcY), 
+						image->width, image->height, color, data);
+				}
+		}
+	}
+	else
+	{
+		if (!revH)
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (y + srcY) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					pixelFn(surface, x + destX, y + destY, image->width - 1 - (x + srcX), 
+						image->height - 1 - (y + srcY), image->width, image->height, color, data);
+				}
+		}
+		else
+		{
+			for (Uint32 y = 0; y < height; y++)
+				for (Uint32 x = 0; x < width; x++)
+				{
+					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+					pixelFn(surface, x + destX, y + destY, image->width - 1 - (x + srcX), y + srcY, 
+						image->width, image->height, color, data);
+				}
+		}
+	}
+}
+
+void drawImageFnA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
+	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY,
+	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py, 
+		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, Uint32 color, void* data), void* data)
+{
+	drawImageFn(surface, image, destX - width / 2 - width / 2.f * alignX,
+		destY - height / 2 - height / 2.f * alignY, srcX, srcY, width, height, pixelFn, data);
 }
