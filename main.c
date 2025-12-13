@@ -56,20 +56,19 @@ bool colorRange(RGB rgb0, RGB rgb1, int dist)
 }
 
 void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
-	Sint32 width, Sint32 height, Uint32 color, void* data)
+	Sint32 width, Sint32 height, RGB color, void* data)
 {
-	RGB pix = unrgb(color);
-	if (!colorRange(pix, (RGB){254, 222, 41}, 64))
+	if (!colorRange(color, (RGB){254, 222, 41}, 64))
 	{
 		Uint64 ticks = *((Uint64*)data);
-		int ox = cosf((ticks * 10 + height - 1 - ty) * 3.1415f / 180.f) * 10;
+		int ox = cosf((ticks + tx) * 10 * 3.1415f / 180.f) * 20;
 		if (px + ox >= 0 && px + ox < surface->w)
 		{
-			if (pix.b + 100 >= 256)
-				pix.b = 255;
+			if (color.b + 100 >= 256)
+				color.b = 255;
 			else
-				pix.b += 100;
-			setPixel(surface, px + ox, py, rgb(pix.r, pix.g, pix.b));
+				color.b += 100;
+			setPixel(surface, px + ox, py, rgb(color.r, color.g, color.b));
 		}
 	}
 }
@@ -296,7 +295,7 @@ int main()
 					-(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 			else // top
 				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
-					-(Sint32)amongUs.width, amongUs.height, 0, 0, pixelFn, &ticks);
+					-(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 		}
 		else // left
 		{

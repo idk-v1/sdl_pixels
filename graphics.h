@@ -387,9 +387,9 @@ PIXEL_FN void drawImageA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint
 PIXEL_FN void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
-		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, Uint32 color, void* data), void* data);
+		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, RGB color, void* data), void* data);
 
 PIXEL_FN void drawImageFnA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
-		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, Uint32 color, void* data), void* data);
+		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, RGB color, void* data), void* data);
