@@ -82,7 +82,7 @@ int main()
 
 	SDL_Window* window = SDL_CreateWindow("SDL Test", width, height, SDL_WINDOW_RESIZABLE);
 	SDL_Surface* surface = SDL_GetWindowSurface(window);
-	pixFmt = SDL_GetPixelFormatDetails(surface->format);
+	setPixelFormat(surface);
 
 	Sint32 mouseX, mouseY;
 	Sint32 mouseXR, mouseYR;

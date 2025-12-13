@@ -21,6 +21,11 @@ extern const SDL_PixelFormatDetails* pixFmt;
 typedef struct RGB { Uint8 r, g, b, x; } RGB;
 #endif
 
+static inline void setPixelFormat(SDL_Surface* surface)
+{
+	pixFmt = SDL_GetPixelFormatDetails(surface->format);
+}
+
 static inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
 {
 	return SDL_MapRGB(pixFmt, NULL, r, g, b);
