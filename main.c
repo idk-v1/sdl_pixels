@@ -79,6 +79,8 @@ int main()
 	colors[8] = rgb(0xFF, 0x00, 0xFF);
 	colors[9] = rgb(0xFF, 0x00, 0x7F);
 
+	Bitmap image = loadImage("test.png");
+
 	bool running = true; 
 	while (running)
 	{
@@ -258,6 +260,10 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
+		drawImageA(surface, &image, mouseXR, mouseYR, 
+			image.height * (ticks / 10 % (image.width / image.height)), 0, 
+			image.height, image.height, 0, 0);
+
 		//drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 100, 100, 5, rgb(0xFF, 0x00, 0x00));
 		//for (int i = 0; i < 10; i++)
 		//	for (int ii = 0; ii < 10; ii++)
@@ -281,6 +287,8 @@ int main()
 		SDL_UpdateWindowSurface(window);
 		fpsCount++;
 	}
+
+	freeImage(&image);
 
 	SDL_DestroyWindow(window);
 	SDL_Quit();

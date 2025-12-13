@@ -36,7 +36,7 @@ inline static void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 col
 	if (x < (Uint32)surface->w && y < (Uint32)surface->h)
 		setPixelUC(surface, x, y, color);
 	else
-		;// printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
+		printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
 }
 
 #ifdef USE_SSE
@@ -574,8 +574,8 @@ static void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 	getTextSize(text, size, &width, &height);
 
 	drawText(surface,
-		x - width / 2.f + width / 2.f * alignX,
-		y - height / 2.f + height / 2.f * alignY,
+		x - width / 2.f - width / 2.f * alignX,
+		y - height / 2.f - height / 2.f * alignY,
 		size, color, text);
 }
 
@@ -729,4 +729,91 @@ static void drawTextFAFn(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX,
 	}
 
 	va_end(prf1);
+}
+
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+typedef struct Bitmap
+{
+	Uint32 width, height;
+	Uint32* pixels;
+} Bitmap;
+
+static Bitmap loadImage(const char* filename)
+{
+	Bitmap bmp = { 0 };
+
+	int width = 0, height = 0, trash = 4;
+	bmp.pixels = stbi_load(filename, &width, &height, &trash, 4);
+	if (bmp.pixels)
+	{
+		bmp.width = width;
+		bmp.height = height;
+	}
+
+	return bmp;
+}
+
+static void freeImage(Bitmap* image)
+{
+	if (image && image->pixels)
+	{
+		stbi_image_free(image->pixels);
+		image->pixels = NULL;
+		image->width = 0;
+		image->height = 0;
+	}
+}
+
+static void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY, 
+	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height)
+{
+	if (width > surface->w)
+		width = surface->w;
+	if (height > surface->h)
+		height = surface->h;
+
+	if (destX < 0)
+	{
+		srcX -= destX;
+		width += destX;
+		destX = 0;
+	}
+	if (destY < 0)
+	{
+		srcY -= destY;
+		height += destY;
+		destY = 0;
+	}
+
+	if (destX >= surface->w || destY >= surface->h)
+		return;
+
+	if (destX + width >= surface->w)
+		width += surface->w - (destX + width);
+	if (destY + height >= surface->h)
+		height += surface->h - (destY + height);
+
+	// maybe reverse image in future
+	if (width <= 0 || height <= 0)
+		return;
+
+	for (Uint32 y = 0; y < height; y++)
+	{
+		for (Uint32 x = 0; x < width; x++)
+		{
+			Uint32 pixel = image->pixels[(x + srcX) + (y + srcY) * image->width];
+			Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
+			setPixelUC(surface, x + destX, y + destY, color);
+		}
+	}
+}
+
+static void drawImageA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
+	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY)
+{
+	drawImage(surface, image, destX - width / 2 - width / 2.f * alignX, 
+		destY - height / 2 - height / 2.f * alignY, srcX, srcY, width, height);
 }
