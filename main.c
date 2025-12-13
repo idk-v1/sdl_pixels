@@ -295,22 +295,22 @@ int main()
 				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
 					-(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 			else // top
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
 					-(Sint32)amongUs.width, amongUs.height, 0, 0, pixelFn, &ticks);
 		}
 		else // left
 		{
 			if (mouseYR > (Sint32)height / 2) // bottom
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
 					(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 			else // top
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
+				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
 					(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 		}
 
-		drawImageA(surface, &image, mouseXR, mouseYR, 
-			image.height * (ticks / 10 % (image.width / image.height)), 0, 
-			image.height, image.height, 0, 0);
+		//drawImageA(surface, &image, mouseXR, mouseYR, 
+		//	image.height * (ticks / 10 % (image.width / image.height)), 0, 
+		//	image.height, image.height, 0, 0);
 
 		//drawRectOutA(surface, mouseXR, mouseYR, 0, 0, 100, 100, 5, rgb(0xFF, 0x00, 0x00));
 		//for (int i = 0; i < 10; i++)

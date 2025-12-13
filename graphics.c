@@ -564,7 +564,7 @@ void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(x + srcX) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 pixel = image->pixels[(x + srcX) + (image->height - 1 - (y + srcY)) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
 					setPixelUC(surface, x + destX, y + destY, color);
 				}
@@ -577,7 +577,7 @@ void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (y + srcY) * image->width];
+					Uint32 pixel = image->pixels[(image->width - 1 - (x + srcX)) + (y + srcY) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
 					setPixelUC(surface, x + destX, y + destY, color);
 				}
@@ -587,7 +587,7 @@ void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 pixel = image->pixels[(image->width - 1 - (x + srcX)) + (image->height - 1 - (y + srcY)) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
 					setPixelUC(surface, x + destX, y + destY, color);
 				}
@@ -660,7 +660,7 @@ void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY
 				{
 					Uint32 pixel = image->pixels[(x + srcX) + (y + srcY) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
-					pixelFn(surface, x + destX, y + destY, x + srcX, y + srcY, 
+					if (pixelFn) pixelFn(surface, x + destX, y + destY, x + srcX, y + srcY, 
 						image->width, image->height, color, data);
 				}
 		}
@@ -669,9 +669,9 @@ void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(x + srcX) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 pixel = image->pixels[(x + srcX) + (image->height - 1 - (y + srcY)) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
-					pixelFn(surface, x + destX, y + destY, x + srcX, image->height - 1 - (y + srcY), 
+					if (pixelFn) pixelFn(surface, x + destX, y + destY, x + srcX, image->height - 1 - (y + srcY),
 						image->width, image->height, color, data);
 				}
 		}
@@ -683,9 +683,9 @@ void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (y + srcY) * image->width];
+					Uint32 pixel = image->pixels[(image->width - 1 - (x + srcX)) + (y + srcY) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
-					pixelFn(surface, x + destX, y + destY, image->width - 1 - (x + srcX), 
+					if (pixelFn) pixelFn(surface, x + destX, y + destY, image->width - 1 - (x + srcX),
 						y + srcY, image->width, image->height, color, data);
 				}
 		}
@@ -694,9 +694,9 @@ void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY
 			for (Uint32 y = 0; y < height; y++)
 				for (Uint32 x = 0; x < width; x++)
 				{
-					Uint32 pixel = image->pixels[(width - 1 - (x + srcX)) + (height - 1 - (y + srcY)) * image->width];
+					Uint32 pixel = image->pixels[(image->width - 1 - (x + srcX)) + (image->height - 1 - (y + srcY)) * image->width];
 					Uint32 color = rgb((pixel >> 0) & 0xFF, (pixel >> 8) & 0xFF, (pixel >> 16) & 0xFF);
-					pixelFn(surface, x + destX, y + destY, 
+					if (pixelFn) pixelFn(surface, x + destX, y + destY,
 						image->width - 1 - (x + srcX), image->height - 1 - (y + srcY), 
 						image->width, image->height, color, data);
 				}
