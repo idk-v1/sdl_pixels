@@ -21,17 +21,19 @@ extern const SDL_PixelFormatDetails* pixFmt;
 typedef struct RGB { Uint8 r, g, b, x; } RGB;
 #endif
 
+// Call this first, just once, this saves it globally
 static inline void setPixelFormat(SDL_Surface* surface)
 {
 	pixFmt = SDL_GetPixelFormatDetails(surface->format);
 }
 
+// Converts from rgb to the system pixel format
 static inline Uint32 rgb(Uint8 r, Uint8 g, Uint8 b)
 {
 	return SDL_MapRGB(pixFmt, NULL, r, g, b);
 }
 
-// unknown format -> RRGGBBXX
+// Converts from the system pixel format to rgb
 static inline RGB unrgb(Uint32 color)
 {
 	RGB rgb = { 0 };
@@ -39,17 +41,21 @@ static inline RGB unrgb(Uint32 color)
 	return rgb;
 }
 
-
+// Not recommended for use, sets pixel without bounds checking
 inline void setPixelUC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	((Uint32*)surface->pixels)[x + y * surface->w] = color;
 }
 
+// Not recomented for use, used as backup for setline speedup if no SSE
 inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 {
 	*((Uint64*)&((Uint32*)surface->pixels)[x + y * surface->w]) = color;
 }
 
+// Sets pixel with bounds checking
+// Use this first for testing, then if all out of bounds cases are covered, use unchecked
+// DrawText uses this, so if you uncomment the printf, it might not be your code messing up
 inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	if (x < (Uint32)surface->w && y < (Uint32)surface->h)
@@ -90,6 +96,7 @@ inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 #define SSE_BEGIN
 #endif
 
+// Unrolled loops, I'm sorry
 #ifdef USE_SSE
 inline static void setHLine64(SDL_Surface* surface, Uint32 x, Uint32 y, __m128 color)
 {
@@ -221,6 +228,8 @@ inline static void setHLine8(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 co
 }
 #endif
 
+// Not recommended for use, used internally to fill a row at a time
+// Not bounds checked
 inline static void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 color)
 {
 	Uint64 color64 = color | (Uint64)color << 32;
@@ -291,69 +300,139 @@ inline static void setLine(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, U
 }
 
 
+// Sets rect of pixels, NOT bounds checked
+// Only use if you are sure this will always be in bounds
 PIXEL_FN void setRect(SDL_Surface* surface, Uint32 x, Uint32 y,
 	Uint32 w, Uint32 h, Uint32 color);
 
+// Sets the entire screen to a color
 PIXEL_FN void clearScreen(SDL_Surface* surface, Uint32 color);
 
-
+// Sets a rect of pixels, will flip if needed and clips
+// Negative width or height work as expected
 PIXEL_FN void drawRect(SDL_Surface* surface, Sint32 x, Sint32 y,
 	Sint32 w, Sint32 h, Uint32 color);
 
+// Sets a rect of pixels, will flip if needed and clips
+// Negative width or height work as expected
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawRectA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Sint32 w, Sint32 h, Uint32 color);
 
+// Draws 4 rects around a rect, not filling in
+// Size is thickness of outline, moving inward
 PIXEL_FN void drawRectOut(SDL_Surface* surface, Sint32 x, Sint32 y,
 	Sint32 w, Sint32 h, Uint32 size, Uint32 color);
 
+// Draws 4 rects around a rect, not filling in
+// Size is thickness of outline, moving inward
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawRectOutA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Sint32 w, Sint32 h, Uint32 size, Uint32 color);
 
 
+// Draws circle, clipped
+// R is radius, due to being ints, circle can't have odd center, r*2 is always even
+// Having diameter felt weird
 PIXEL_FN void drawCircle(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 r, Uint32 color);
 
+// Draws circle, clipped
+// R is radius, due to being ints, circle can't have odd center, r*2 is always even
+// Having diameter felt weird
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Uint32 r, Uint32 color);
 
 
-extern int letterSpacing;
-extern int lineSpacing;
+// It's fine to change these
+// Default: 1 pixel
+extern int letterSpacing; // Spacing between characters
+extern int lineSpacing; // Spacing between lines
 
+// Gets the bounds of text if it were to be drawn
+// Pass a pointer to as width and height to get the data
 PIXEL_FN void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* height);
 
+// Gets the bounds of text if it were to be drawn
+// Pass a pointer to as width and height to get the data
+// Printf formatted text
 PIXEL_FN void getTextSizeF(Uint32 size, Uint32* width, Uint32* height, const char* fmt, ...);
 
+// Draws a single character
+// Used internally, but it's fine to use
+// Clipped
 PIXEL_FN void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size,
 	Uint32 color, char ch);
 
+// Draws a single character
+// Used internally, but it's fine to use
+// Clipped
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawCharA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Uint32 size, Uint32 color, char ch);
 
+// Draws a string
+// Clipped
 PIXEL_FN void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size,
 	Uint32 color, const char* text);
 
+// Draws a string
+// Clipped
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Uint32 size, Uint32 color, const char* text);
 
+// Draws a string
+// Clipped
+// Uses printf format for text
 PIXEL_FN void drawTextF(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size,
 	Uint32 color, const char* fmt, ...);
 
+// Draws a string
+// Clipped
+// Uses printf format for text
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawTextFA(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Sint32 size, Uint32 color, const char* fmt, ...);
 
+// Draws a string
+// Clipped
+// Pass a function to be called before the char is drawn
+// Pass a void pointer as data to access in the function
+// Use: drawing a more accurate background behind text
 PIXEL_FN void drawTextFn(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color,
 	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*), 
 	void* data, const char* text);
 
+// Draws a string
+// Clipped
+// Pass a function to be called before the char is drawn
+// Pass a void pointer as data to access in the function
+// Use: drawing a more accurate background behind text
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawTextAFn(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Uint32 size, Uint32 color,
 	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*),
 	void* data, const char* text);
 
+
+// Draws a string
+// Clipped
+// Pass a function to be called before the char is drawn
+// Pass a void pointer as data to access in the function
+// Use: drawing a more accurate background behind text
+// Uses printf format for text
 PIXEL_FN void drawTextFFn(SDL_Surface* surface, Sint32 x, Sint32 y, Sint32 size, Uint32 color,
 	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*),
 	void* data, const char* fmt, ...);
 
+// Draws a string
+// Clipped
+// Pass a function to be called before the char is drawn
+// Pass a void pointer as data to access in the function
+// Use: drawing a more accurate background behind text
+// Uses printf format for text
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawTextFAFn(SDL_Surface* surface, Sint32 x, Sint32 y,
 	float alignX, float alignY, Sint32 size, Uint32 color,
 	void(before)(SDL_Surface*, Sint32, Sint32, Sint32, Sint32, char, void*),
@@ -374,33 +453,75 @@ typedef struct Bitmap
 } Bitmap;
 #endif
 
+// Loads an image
+// Use freeImage() when done
 PIXEL_FN Bitmap loadImage(const char* filename);
 
+// Frees image and sets everything to NULL
 PIXEL_FN void freeImage(Bitmap* image);
 
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
 PIXEL_FN void drawImage(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height);
 
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawImageA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY);
 
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
+// Pass a function to call at every pixel, kind of like a shader
+// This will clip the image, so if you need to offset pixels, use drawImageFnNC()
 PIXEL_FN void drawImageFn(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
 		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, RGB color, void* data), void* data);
 
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
+// Pass a function to call at every pixel, kind of like a shader
+// This will clip the image, so if you need to offset pixels, use drawImageFnNC()
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawImageFnA(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
 		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, RGB color, void* data), void* data);
 
-// Use custom shader, no clip
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
+// Pass a function to call at every pixel, kind of like a shader
+// This is NOT bounds checked, make sure 0 <= x < surface->w and 0 <= y surface->h
 PIXEL_FN void drawImageFnNC(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
 		Sint32 tx, Sint32 ty, Sint32 width, Sint32 height, RGB color, void* data), void* data);
 
-// Use custom shader, aligned, no clip
+// Draws an image
+// dest is where on the screen it will be drawn
+// src is the image position to copy from, spritesheet coordinates stuff
+// width and height are the max size to be drawn, bounds checking will be done
+// Negative width or height will reverse the image in that direction
+// Pass a function to call at every pixel, kind of like a shader
+// This is NOT bounds checked, make sure 0 <= x < surface->w and 0 <= y surface->h
+// Aligned: 0 0 means centered, -1 -1 means origin is top left, 1 1 is bottom right
 PIXEL_FN void drawImageFnANC(SDL_Surface* surface, Bitmap* image, Sint32 destX, Sint32 destY,
 	Sint32 srcX, Sint32 srcY, Sint32 width, Sint32 height, float alignX, float alignY,
 	void(pixelFn)(SDL_Surface* surface, Sint32 px, Sint32 py,
