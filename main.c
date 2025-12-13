@@ -58,18 +58,20 @@ bool colorRange(RGB rgb0, RGB rgb1, int dist)
 void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
 	Sint32 width, Sint32 height, RGB color, void* data)
 {
-	if (!colorRange(color, (RGB){254, 222, 41}, 64))
+	if (py < 0 || py >= surface->h)
+		return;
+	if (colorRange(color, (RGB) { 254, 222, 41 }, 64))
+		return;
+
+	Uint64 ticks = *((Uint64*)data);
+	int ox = cosf((ticks + tx) * 10 * 3.1415f / 180.f) * 20;
+	if (px + ox >= 0 && px + ox < surface->w)
 	{
-		Uint64 ticks = *((Uint64*)data);
-		int ox = cosf((ticks + tx) * 10 * 3.1415f / 180.f) * 20;
-		if (px + ox >= 0 && px + ox < surface->w)
-		{
-			if (color.b + 100 >= 256)
-				color.b = 255;
-			else
-				color.b += 100;
-			setPixel(surface, px + ox, py, rgb(color.r, color.g, color.b));
-		}
+		if (color.b + 100 >= 256)
+			color.b = 255;
+		else
+			color.b += 100;
+		setPixel(surface, px + ox, py, rgb(color.r, color.g, color.b));
 	}
 }
 
@@ -287,6 +289,9 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, "0", ticks);     x += (keyWN + keyWN) / 2 + pad;
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
+
+		drawImageFnANC(surface, &amongUs, mouseXR, mouseYR, 0, 0,
+			(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 
 		if (mouseXR > (Sint32)width / 2) // right
 		{
