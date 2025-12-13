@@ -6,14 +6,6 @@
 
 #include "graphics.h"
 
-#ifdef __GNUC__
-#define DECLARE_ALIGNED(t, v, a) t __attribute__((aligned(a))) v
-#elif defined(_MSC_VER)
-#define DECLARE_ALIGNED(t, v, a) __declspec(align(a)) t v
-#else
-#define DECLARE_ALIGNED(t, v, a) t v
-#endif
-
 const SDL_PixelFormatDetails* pixFmt = NULL;
 
 void setRect(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 w, Uint32 h, Uint32 color)

@@ -53,6 +53,13 @@ inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 		//printf("Pixel out of bounds (%d %d)\n", x - (Sint32)surface->w, y - (Sint32)surface->h);
 }
 
+#ifdef __GNUC__
+#define DECLARE_ALIGNED(t, v, a) t __attribute__((aligned(a))) v
+#elif defined(_MSC_VER)
+#define DECLARE_ALIGNED(t, v, a) __declspec(align(a)) t v
+#else
+#define DECLARE_ALIGNED(t, v, a) t v
+#endif
 
 #ifdef USE_SSE
 #include <immintrin.h>
