@@ -417,7 +417,7 @@ static void drawCircleA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, 
 
 #include "bulletinV1_font.h"
 
-static int textSpacing = 1;
+static int letterSpacing = 1;
 static int lineSpacing = 1;
 
 static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* height)
@@ -428,10 +428,10 @@ static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* he
 	if (!text)
 		return;
 
-	*height = (size ? size * font_h : font_h / 2);
+	*height = (size ? font_h : font_h / 2);
 
 	Uint32 x = 0;
-	Uint32 y = (size ? size * font_h : font_h / 2);
+	Uint32 y = (size ? font_h : font_h / 2);
 
 	for (Uint32 i = 0; text[i]; i++)
 	{
@@ -439,12 +439,12 @@ static void getTextSize(const char* text, Uint32 size, Uint32* width, Uint32* he
 		{
 			if (x > *width)
 				*width = x;
-			y += (size ? size * font_h : font_h / 2) + lineSpacing;
+			y += (size ? font_h : font_h / 2) + lineSpacing;
 			x = 0;
 		}
 		else
 		{
-			x += (size ? size * font_w : font_w / 2) + textSpacing;
+			x += (size ? font_w : font_w / 2) + letterSpacing;
 			*height = y;
 		}
 	}
@@ -487,6 +487,7 @@ static inline bool getArrayBit(const Uint32 array[], Uint32 i)
 	Uint32 shift = 31 - (i & 0b11111);
 	return (array[index] >> shift) & 1;
 }
+
 
 static void drawChar(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint32 color, char ch)
 {
@@ -562,7 +563,7 @@ static void drawText(SDL_Surface* surface, Sint32 x, Sint32 y, Uint32 size, Uint
 		else if (text[i] < 127 && text[i] >= ' ')
 		{
 			drawChar(surface, x + xx, y + yy, size, color, text[i]);
-			xx += (size ? size * font_w : font_w / 2) + textSpacing;
+			xx += (size ? size * font_w : font_w / 2) + letterSpacing;
 		}
 	}
 }
@@ -573,8 +574,8 @@ static void drawTextA(SDL_Surface* surface, Sint32 x, Sint32 y, float alignX, fl
 	getTextSize(text, size, &width, &height);
 
 	drawText(surface,
-		x - width / 2.f - width / 2.f * alignX,
-		y - height / 2.f - height / 2.f * alignY,
+		x - width / 2.f + width / 2.f * alignX,
+		y - height / 2.f + height / 2.f * alignY,
 		size, color, text);
 }
 
