@@ -55,7 +55,6 @@ inline void setPixel2UC(SDL_Surface* surface, Uint32 x, Uint32 y, Uint64 color)
 
 // Sets pixel with bounds checking
 // Use this first for testing, then if all out of bounds cases are covered, use unchecked
-// DrawText uses this, so if you uncomment the printf, it might not be your code messing up
 inline void setPixel(SDL_Surface* surface, Uint32 x, Uint32 y, Uint32 color)
 {
 	if (x < (Uint32)surface->w && y < (Uint32)surface->h)

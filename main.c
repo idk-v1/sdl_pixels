@@ -290,8 +290,8 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
-		drawImageFnANC(surface, &amongUs, mouseXR, mouseYR, 0, 0,
-			(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		//drawImageFnANC(surface, &amongUs, mouseXR, mouseYR, 0, 0,
+		//	(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 
 		if (mouseXR > (Sint32)width / 2) // right
 		{
