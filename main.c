@@ -1,7 +1,7 @@
 #include <SDL3/SDL.h>
 #include <stdio.h>
 
-//#define USE_SSE
+#define USE_SSE
 #include "graphics.h"
 
 void getMousePos(Sint32* mouseX, Sint32* mouseY)
@@ -55,23 +55,27 @@ bool colorRange(RGB rgb0, RGB rgb1, int dist)
 	return (r <= dist && g <= dist && b <= dist);
 }
 
+const float TO_RAD = 3.1415f / 180.f;
 void pixelFn(SDL_Surface* surface, Sint32 px, Sint32 py, Sint32 tx, Sint32 ty,
-	Sint32 width, Sint32 height, RGB color, void* data)
+	Sint32 width, Sint32 height, Uint32 pixel, void* data)
 {
-	if (py < 0 || py >= surface->h)
-		return;
-	if (colorRange(color, (RGB) { 254, 222, 41 }, 64))
+	// definatly out of bounds
+	if (py < 0 || py >= surface->h || px + 20 < 0 || px - 20 >= surface->w)
 		return;
 
+	RGB color = unrgb(pixel);
+	if (colorRange(color, (RGB) { 254, 222, 41 }, 64))
+		return;
+	
 	Uint64 ticks = *((Uint64*)data);
-	int ox = cosf((ticks + tx) * 10 * 3.1415f / 180.f) * 20;
+	int ox = cosf((ticks + tx) * 10 * TO_RAD) * 20;
 	if (px + ox >= 0 && px + ox < surface->w)
 	{
 		if (color.b + 100 >= 256)
 			color.b = 255;
 		else
 			color.b += 100;
-		setPixel(surface, px + ox, py, rgb(color.r, color.g, color.b));
+		setPixelUC(surface, px + ox, py, rgb(color.r, color.g, color.b));
 	}
 }
 
@@ -290,27 +294,27 @@ int main()
 			drawKey(surface, x, y, keyWN, keyHN, 1, ".", ticks);     x += (keyWN + keyWN) / 2 + pad;
 		}
 
-		//drawImageFnANC(surface, &amongUs, mouseXR, mouseYR, 0, 0,
-		//	(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		drawImageFnANC(surface, &amongUs, mouseXR, mouseYR, 0, 0,
+			(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
 
-		if (mouseXR > (Sint32)width / 2) // right
-		{
-			if (mouseYR > (Sint32)height / 2) // bottom
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0, 
-					-(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
-			else // top
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
-					-(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
-		}
-		else // left
-		{
-			if (mouseYR > (Sint32)height / 2) // bottom
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
-					(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
-			else // top
-				drawImageFnA(surface, &amongUs, width / 2, height / 2, 0, 0,
-					(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
-		}
+		//if (mouseXR > (Sint32)width / 2) // right
+		//{
+		//	if (mouseYR > (Sint32)height / 2) // bottom
+		//		drawImageFnANC(surface, &amongUs, width / 2, height / 2, 0, 0, 
+		//			-(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		//	else // top
+		//		drawImageFnANC(surface, &amongUs, width / 2, height / 2, 0, 0,
+		//			-(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		//}
+		//else // left
+		//{
+		//	if (mouseYR > (Sint32)height / 2) // bottom
+		//		drawImageFnANC(surface, &amongUs, width / 2, height / 2, 0, 0,
+		//			(Sint32)amongUs.width, -(Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		//	else // top
+		//		drawImageFnANC(surface, &amongUs, width / 2, height / 2, 0, 0,
+		//			(Sint32)amongUs.width, (Sint32)amongUs.height, 0, 0, pixelFn, &ticks);
+		//}
 
 		//drawImageA(surface, &image, mouseXR, mouseYR, 
 		//	image.height * (ticks / 10 % (image.width / image.height)), 0, 
